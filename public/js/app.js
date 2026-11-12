@@ -94,7 +94,7 @@ const LVL = { 'سهل': 'easy', 'متوسط': 'mid', 'سريع': 'fast', 'متق
 const gameCard = (g, i) => `<button type="button" class="sa-gcard" data-g="${g.id}" style="--i:${i}" aria-label="${esc(g.title)}">
   <span class="sa-pv" aria-hidden="true">${PV.html(g.id)}</span>
   <span class="sa-gico">${I(g.icon)}</span>
-  <span class="sa-gbody">${g.city ? `<span class="sa-gtag lv-exp">${esc(g.level)} · غرفة العمليات</span>` : `<span class="sa-gtag lv-${LVL[g.level] || 'mid'}">${esc(g.level)}</span>`}<b>${esc(g.title)}</b><span class="sa-gdesc">${esc(g.desc)}</span></span>
+  <span class="sa-gbody"><b>${esc(g.title)}</b><span class="sa-gdesc">${esc(g.desc)}</span></span>
   <span class="sa-gmeta"><span class="sa-gtime">${I('Timer')} ${fmt(g.time)}</span><span class="sa-gplay">${I('Play')} اعرف كيف تلعب</span></span></button>`;
 
 /* ---------- شرح التحدي قبل البدء ---------- */
@@ -113,7 +113,7 @@ function openIntro(id) {
   el.innerHTML = `<div class="sa-intro-card">
     <button type="button" class="sa-intro-x" id="intro-x" aria-label="إغلاق">${I('X')}</button>
     <div class="sa-intro-art"><div class="sa-pv big" aria-hidden="true">${PV.html(id)}</div>
-      <div class="sa-intro-meta"><span>${I('Timer')} ${fmt(g.time)}</span><span class="lv">${esc(g.level)}</span></div></div>
+      <div class="sa-intro-meta"><span>${I('Timer')} ${fmt(g.time)}</span></div></div>
     <div class="sa-intro-body">
       <small class="sa-intro-k">${I('Lightbulb')} شرح سريع قبل أن تبدأ</small>
       <h2 id="intro-t">${esc(g.title)}</h2>
