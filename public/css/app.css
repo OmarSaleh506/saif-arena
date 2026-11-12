@@ -304,3 +304,7 @@ body.modal-open{overflow:hidden}
 .ad-toggle.on{border-color:var(--ok)}.ad-toggle.on i{background:var(--ok)}.ad-toggle.on i::after{inset-inline-start:1.15rem}
 .ad-warn{margin:.8rem 0 0;padding:.6rem .9rem;border-radius:.8rem;background:rgba(232,199,122,.1);border:1px solid rgba(232,199,122,.35);color:var(--soft);font-size:.9rem}
 .ad-card .ad-acts a.sa-btn{text-decoration:none}
+
+/* لا تُقصّ نقاط الحروف في النص المتدرّج */
+.grad{display:inline-block;padding:.2em .08em .26em;margin:-.2em -.08em -.26em;line-height:1.35}
+.sa-hero h1{line-height:1.2}
