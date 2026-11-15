@@ -215,17 +215,13 @@ const LOGOS = {"saif_real": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUQAA
 RUN.deepfake = api => {
   const R = [
     [{ k: 'img', fake: true, src: 'saif_nodot', ev: ['النقطة فوق الحرف مفقودة', 'قارن دائمًا بالشعار الرسمي'] },
-     { k: 'aud', fake: true, txt: 'السلام عليكم، أنا مديرك. أنا داخل اجتماع وما أقدر أرد. أحتاج تحويل عاجل اليوم لمورّد، حوّل وأرسل لي الإيصال، وخلّ الموضوع بيني وبينك.', ev: ['المزيّف: نبرة ثابتة بلا مشاعر', 'توقفات في أماكن غير طبيعية', 'الصوت يمكن استنساخه بالذكاء الاصطناعي'] },
-     { k: 'sms', fake: true, from: 'من: أكاديمية طويق', txt: 'تم قبولك في المعسكر! أكّد تسجيلك خلال ساعة عبر الرابط: tuwaiiq.edu.sa/apply', ev: ['حرف زائد: tuwaiiq بدل tuwaiq', 'مهلة قصيرة', 'طلب إجراء عبر رابط'] }],
+     { k: 'sms', fake: true, from: 'من: أكاديمية طويق', txt: 'أهلًا راشد، تم ترشيحك للقبول في هاكاثون «أبشر طويق» بجوائز تصل إلى 1,000,000 ريال 🚀 لتأكيد تسجيلك الآن: s.tuwaiiq.edu.sa/AtadK — في موعد أقصاه اليوم 11:00م', ev: ['حرف زائد: tuwaiiq بدل tuwaiq', 'مهلة قصيرة وضغط للتسجيل', 'تحقق من الرابط حرفًا حرفًا'] }],
     [{ k: 'img', fake: false, src: 'tw_real', ev: ['الشعار مطابق للرسمي', 'المربعات الثلاثة كاملة'] },
-     { k: 'aud', fake: false, txt: 'السلام عليكم، معك قسم مكافحة الاحتيال في البنك. حاولوا يسحبون من حسابك خمسة آلاف ريال. عشان نوقف العملية، أعطنا الرمز اللي وصلك الحين.', ev: ['الحقيقي: سرعة وتنفّس طبيعيان', 'المزيّف: إيقاع آلي متقطع'] },
-     { k: 'sms', fake: false, from: 'من: أكاديمية طويق', txt: 'يبدأ المعسكر يوم الأحد. تجد التفاصيل في حسابك على tuwaiq.edu.sa', ev: ['النطاق الرسمي tuwaiq.edu.sa', 'لا يطلب بيانات', 'لا مهلة ولا تهديد'] }],
+     { k: 'sms', fake: false, from: 'من: أكاديمية طويق', txt: 'شهر الأمن والتقنية بالشراكة بين أكاديمية طويق ووزارة الداخلية ضمن أنشطة القمة العالمية للأمن والتقنية (GSTS)؛ يتيح لك معسكرات وبرامج احترافية، ولقاءات معرفيّة، وتحديات تقنيّة. سجّل الآن: s.tuwaiq.edu.sa/UZCjF', ev: ['النطاق الرسمي tuwaiq.edu.sa', 'لا يطلب بيانات سرية ولا مبالغ', 'لا مهلة ولا تهديد'] }],
     [{ k: 'img', fake: true, src: 'tw_fake', ev: ['مربع ناقص في رمز طويق', 'الشعار المزيّف يُستخدم في صفحات احتيال'] },
-     { k: 'aud', fake: true, txt: 'يبه، أنا في مشكلة وجوالي انكسر وهذا رقمي الجديد. أحتاج مبلغ عاجل، حوّل لي الحين ولا تقول لأمي.', ev: ['المزيّف: لا انفعال رغم أن الموقف عاطفي', 'نبرة معدنية', 'تحقق دائمًا بالاتصال المباشر'] },
-     { k: 'sms', fake: true, from: 'من: منصة سطر', txt: 'شهادتك جاهزة! ادفع 15 ريال لإصدارها عبر: tuwaiq-edu.sa/satr/cert', ev: ['شرطة زائدة: tuwaiq-edu بدل tuwaiq.edu', 'طلب دفع', 'الشهادات لا تُطلب بهذه الطريقة'] }],
+     { k: 'sms', fake: true, from: 'من: أكاديمية طويق', txt: '«راشد» طوّر مشروعك بدون كود! المقاعد محدودة في هاكاثون طويق بمنهجيّة (Vibe Coding). احجز مقعدك الآن مقابل رسوم 50 ريال: hackathon.tuwaiq-edu.sa', ev: ['شرطة زائدة: tuwaiq-edu بدل tuwaiq.edu', 'طلب دفع لحجز المقعد', 'الأكاديمية لا تطلب رسومًا بهذه الطريقة'] }],
     [{ k: 'img', fake: true, src: 'saif_noI', ev: ['حرف ناقص: SAF بدل SAIF', 'تفاصيل صغيرة يغفل عنها الناس'] },
-     { k: 'aud', fake: false, txt: 'معك مندوب التوصيل. شحنتك واقفة عندنا بسبب رسوم ناقصة. ادفع تسعة عشر ريال من الرابط اللي وصلك خلال ساعة، وإلا ترجع الشحنة.', ev: ['الحقيقي: تغيّر طبيعي في النبرة', 'المزيّف: كلمات متقطعة وسرعة غير بشرية'] },
-     { k: 'sms', fake: true, from: 'من: الدعم الفني', txt: 'حسابك في أكاديمية طويق سيُغلق خلال 24 ساعة! حدّث كلمة المرور: tuwaaiq.edu.sa/login', ev: ['حرف زائد: tuwaaiq', 'تهديد بالإغلاق', 'طلب كلمة المرور'] }],
+     { k: 'sms', fake: false, from: 'من: أكاديمية طويق', txt: 'راشد جاهز للتحدي؟ 👨‍💻 ننتظرك يوم الأربعاء 30 سبتمبر، في تحدي طويق البرمجي، وقت الحضور الساعة 6:00م. يلزم إحضار جهازك 💻 نشوفك في التحدي', ev: ['لا رابط مشبوه', 'لا يطلب بيانات ولا مالًا', 'موعد ومكان واضحان'] }],
   ];
   const synth = window.speechSynthesis; let voice = null;
   const pickVoice = () => { try { voice = (synth.getVoices() || []).find(v => /^ar/i.test(v.lang)) || null; } catch (e) {} };
@@ -261,7 +257,7 @@ RUN.deepfake = api => {
   onClean(stopClip);
   let r = 0, right = 0;
   const draw = () => {
-    const ans = [null, null, null];
+    const ans = [null, null];
     R[r].forEach(it => { if (it.k === 'aud' && it.real === undefined) it.real = Math.random() < .5 ? 0 : 1; });
     const wave2 = j => Array.from({ length: 26 }, (_, i) => `<i style="height:${12 + Math.abs(Math.sin(i * 0.8 + j * 2 + r) * 50 + Math.cos(i * 1.7) * 20)}px"></i>`).join('');
     const wave = Array.from({ length: 40 }, (_, i) => `<i style="height:${18 + Math.abs(Math.sin(i * 0.7 + r) * 70 + Math.cos(i * 1.9) * 30)}px"></i>`).join('');
@@ -281,7 +277,7 @@ RUN.deepfake = api => {
       const v = document.createElement('div'); v.className = 'verdict'; v.style.background = it.k === 'aud' ? 'var(--terr)' : it.fake ? 'var(--bad)' : 'var(--ok)'; v.textContent = (it.k === 'aud' ? 'الحقيقي: المقطع ' + ['أ', 'ب'][it.real] : it.fake ? 'مزيّف' : 'حقيقي') + (ok ? ' ✓ إجابة صحيحة' : ' · إجابتك خاطئة'); m.querySelector('.media').appendChild(v);
       if (it.k === 'aud') $('#tr' + k).textContent = '«' + it.txt + '»';
       $('#tr' + k).insertAdjacentHTML('afterend', `<div class="evc ${it.fake || it.k === 'aud' ? '' : 'okc'}">${it.ev.map(e => `<span>${esc(e)}</span>`).join('')}</div>`);
-      if (ans.every(x => x !== null)) setTimeout(() => { stopClip(); R[r].forEach(it => delete it.real); r++; r < 4 ? draw() : api.end({ detail: `${right} من 12 إجابة صحيحة` }); }, 2600);
+      if (ans.every(x => x !== null)) setTimeout(() => { stopClip(); R[r].forEach(it => delete it.real); r++; r < 4 ? draw() : api.end({ detail: `${right} من 8 إجابة صحيحة` }); }, 2600);
     });
   };
   api.onTimeout = () => api.end({ timeout: true, detail: `${right} إجابات صحيحة` });

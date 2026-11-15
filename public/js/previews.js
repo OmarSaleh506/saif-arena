@@ -162,19 +162,13 @@ const PV = (() => {
       T(200, 40, 'من أين بدأ الاختراق؟', 15, K.cream, 'opacity=".75"'));
   };
 
-  /* 11) حقيقي أم مزيّف؟: مقطعان صوتيان */
-  S.deepfake = () => {
-    const wave = (cx, t, jag) => [0, 1, 2, 3, 4, 5, 6, 7, 8].map(i => {
-      const h = jag ? [10, 34, 12, 40, 8, 30, 14, 38, 10][i] : [14, 26, 38, 30, 44, 32, 40, 24, 16][i], x = cx - 40 + i * 10;
-      return `<rect x="${x}" width="6" rx="3" fill="${K.blue}" y="${110 - 5}" height="10">${an('height', `10;10;${h};${(h * .5).toFixed(0)};${h};10;10`, `0;${t};${(t + .05).toFixed(2)};${(t + .1).toFixed(2)};${(t + .15).toFixed(2)};${(t + .22).toFixed(2)};1`)}${an('y', `105;105;${110 - h / 2};${110 - h / 4};${110 - h / 2};105;105`, `0;${t};${(t + .05).toFixed(2)};${(t + .1).toFixed(2)};${(t + .15).toFixed(2)};${(t + .22).toFixed(2)};1`)}</rect>`;
-    }).join('');
-    return svg(
-      [[110, 'أ'], [290, 'ب']].map(([cx, s]) => R(cx - 70, 50, 140, 120, K.panel, 16, `stroke="${K.line}" stroke-width="2"`) + C(cx, 80, 15, K.coral) + `<path d="M${cx - 4} ${73} L${cx + 8} 80 L${cx - 4} 87Z" fill="#fff"/>` + T(cx, 158, s, 16, K.cream, 'opacity=".8"')).join('') +
-      wave(110, .26, false) + wave(290, .56, true) +
-      `<g transform="translate(200 110)">${C(0, 0, 16, K.gold)}${T(0, 6, '؟', 20, '#081A19')}${pulse(18, 28, K.gold, 2)}</g>` +
-      `<g opacity="0">${show(.78)}${R(40, 44, 140, 132, 'none', 18, `stroke="${K.ok}" stroke-width="3.5"`)}</g>` +
-      cursor([350, 205], [110, 82], [290, 82]));
-  };
+  /* 11) حقيقي أم مزيّف؟: شعار ورسالة */
+  S.deepfake = () => svg(
+    R(40, 50, 140, 120, K.panel, 16, `stroke="${K.line}" stroke-width="2"`) + T(110, 118, 'SAIF', 30, K.cream) +
+    R(220, 50, 140, 120, K.cream, 16) + R(234, 66, 112, 22, '#fff', 8) + R(234, 98, 112, 22, '#fff', 8) + R(234, 130, 70, 22, '#fff', 8) +
+    `<g transform="translate(200 110)">${C(0, 0, 16, K.gold)}${T(0, 6, '؟', 20, '#081A19')}${pulse(18, 28, K.gold, 2)}</g>` +
+    `<g opacity="0">${show(.78)}${R(40, 44, 140, 132, 'none', 18, `stroke="${K.ok}" stroke-width="3.5"`)}</g>` +
+    cursor([350, 205], [110, 82], [290, 82]));
 
   /* 12) تعلّم الآلة: تصنيف النقاط */
   S.ml = () => {
