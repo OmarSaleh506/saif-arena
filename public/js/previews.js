@@ -74,17 +74,20 @@ const PV = (() => {
       cursor([30, 205], [88, 190], [300, 110]));
   };
 
-  /* 4) محلل البيانات: أعمدة تنمو واختيار بوابة */
+  /* 4) محلل البيانات: مجسّم المعرض من الأعلى، زوار يخرجون من البوابات والمترو يمرّ */
   S.b2 = () => {
-    const hs = [60, 95, 130, 100, 70, 45], bars = hs.map((h, i) => {
-      const x = 96 + i * 36, hot = i === 2;
-      return `<rect x="${x}" width="24" rx="5" fill="${hot ? K.gold : K.blue}" opacity="${hot ? 1 : .6}" y="170" height="0">${an('height', `0;0;${h};${h};0`, `0;${(.08 + i * .03).toFixed(2)};${(.3 + i * .03).toFixed(2)};.93;1`)}${an('y', `170;170;${170 - h};${170 - h};170`, `0;${(.08 + i * .03).toFixed(2)};${(.3 + i * .03).toFixed(2)};.93;1`)}</rect>`;
-    }).join('');
-    return svg(L(80, 172, 320, 172, K.line, 2) + bars +
-      `<polyline points="96,120 132,95 168,60 204,86 240,112 276,128" fill="none" stroke="${K.coral}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100">${an('stroke-dashoffset', '100;100;0;0;100', '0;.35;.6;.93;1')}</polyline>` +
-      `<g transform="translate(168 40)" opacity="0">${show(.3)}${R(-26, -14, 52, 24, K.gold, 12)}${T(0, 3, 'أنت', 13, '#081A19')}</g>` +
-      [0, 1, 2].map(i => `<g>${R(120 + i * 62, 186, 54, 22, K.panel, 11, `stroke="${K.line}"`)}${i === 1 ? `<g opacity="0">${show(.58)}${R(120 + i * 62, 186, 54, 22, K.coral, 11)}</g>` : ''}</g>`).join('') +
-      cursor([350, 200], [168, 100], [210, 198]));
+    const halls = [0, 1, 2].map(i => R(92 + i * 80, 34, 66, 56, i === 1 ? 'rgba(132,182,198,.28)' : K.panel, 6, `stroke="${K.line}"`)).join('');
+    const gate = (x, hot) => R(x - 26, 112, 52, 8, hot ? K.gold : K.blue, 3, `opacity="${hot ? 1 : .55}"`);
+    const dots = (x, n, t) => Array.from({ length: n }, (_, k) => `<circle cx="${x - 22 + (k % 6) * 8.5}" cy="${132 + ((k / 6) | 0) * 8}" r="3" fill="${K.cream}" opacity="0">${an('opacity', '0;0;1;1;0', `0;${(t + k * .012).toFixed(2)};${(t + .03 + k * .012).toFixed(2)};.9;1`)}</circle>`).join('');
+    const train = `<g>${mv('-160,0;-160,0;70,0;70,0;470,0;470,0', '0;.05;.3;.62;.85;1')}${R(0, 188, 150, 14, K.blue, 5)}${[1, 2, 3, 4, 5, 6].map(k => R(8 + (k - 1) * 24, 191, 16, 6, '#0b2a33', 2)).join('')}</g>`;
+    const car = (y, dir, d) => `<g>${mv(dir > 0 ? '-40,0;440,0' : '440,0;-40,0', '0;1').replace(`dur="${D}"`, `dur="${d}s"`)}${R(0, y, 26, 11, K.coral, 4)}${R(7, y - 4, 12, 6, K.cream, 2, 'opacity=".7"')}</g>`;
+    return svg(L(20, 100, 380, 100, K.line, 1.5, 'opacity=".35"') + R(76, 24, 250, 76, 'rgba(244,242,234,.04)', 8, `stroke="${K.line}"`) + halls +
+      gate(110, 0) + gate(200, 1) + gate(290, 0) +
+      dots(200, 24, .3) + dots(110, 6, .34) + dots(290, 8, .4) +
+      L(20, 166, 380, 166, K.line, 1, 'opacity=".25"') + car(170, 1, 7) + car(148, -1, 9) + train +
+      `<g opacity="0">${show(.5)}${R(161, 99, 78, 22, K.gold, 11)}${T(200, 114, 'بوابة إضافية', 13, '#081A19')}</g>` +
+      `<g opacity="0">${show(.2)}${R(168, 14, 64, 22, K.gold, 11)}${T(200, 29, '8:30 م', 14, '#081A19')}</g>` +
+      cursor([350, 200], [200, 118], [290, 205]));
   };
 
   /* 5) مشغل الدرونز: مسار يتجنب الحظر والرياح */

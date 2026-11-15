@@ -217,3 +217,31 @@ body{background:#081A19;font-family:var(--f);overflow:hidden;padding-left:max(0p
 .spd{position:absolute;top:150px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:8px 12px 8px 22px;border-radius:999px;border:1.5px solid rgba(244,242,234,.25);background:rgba(12,36,35,.7);z-index:6;font-size:22px;color:var(--soft)}
 .spd button{min-width:84px;height:54px;border-radius:999px;border:1.5px solid rgba(244,242,234,.25);background:transparent;font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
 .spd button.on{background:var(--terr);border-color:var(--terr);color:#fff}
+
+/* ===== محلل البيانات ثلاثي الأبعاد ===== */
+.x3{position:absolute;inset:0;overflow:hidden}
+.x3c{position:absolute;left:0;top:120px;width:1920px;height:960px;background:#0b1620}
+.x3p{position:absolute;padding:30px 32px;border-radius:28px;background:rgba(8,26,25,.88);border:1px solid rgba(244,242,234,.16);box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.x3p h3{font-size:30px;margin:0 0 14px;font-weight:800}
+.x3p .muted{font-size:22px;color:#C7D3D1}
+.x3q h3{font-size:46px;line-height:1.25;margin:10px 0 24px}
+.x3q .opt{min-height:96px;font-size:30px;flex-direction:row;justify-content:space-between;padding:10px 26px;text-align:right}
+.x3q .opt small{font-size:19px}
+.x3q .opts1{gap:14px}
+.x3load{position:absolute;inset:120px 0 0 0;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:700;background:#0b1620;z-index:2}
+.x3load i{display:inline-block;width:28px;height:28px;border:4px solid rgba(244,242,234,.25);border-top-color:#84B6C6;border-radius:50%;margin-inline-end:18px;animation:x3s 1s linear infinite}
+@keyframes x3s{to{transform:rotate(360deg)}}
+.x3hud{display:flex;align-items:center;gap:36px;left:50%;margin-left:-740px;width:1480px;bottom:36px;top:auto;padding:22px 36px}.x3hc{display:flex;flex-direction:column;gap:10px;min-width:300px}.x3hm{flex:1}.x3hr{display:flex;flex-direction:column;gap:12px;min-width:190px}
+.x3clock{font-size:76px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.x3clock small{font-size:30px;margin-inline-start:10px;color:#E8C77A}
+.x3g{display:grid;grid-template-columns:120px 1fr 54px;gap:12px;align-items:center;font-size:23px;margin:7px 0}
+.x3g .t{height:22px;border-radius:11px;background:rgba(244,242,234,.1);overflow:hidden}.x3g .t i{display:block;height:100%;width:0;border-radius:11px;background:#52d6a2;transition:width .15s,background .2s}
+.x3g b{font-variant-numeric:tabular-nums;text-align:center;font-size:24px}
+.x3sp{display:flex;gap:10px}.x3sp .opt{min-height:56px;font-size:24px;flex:1}
+.x3tag{display:inline-block;padding:6px 16px;border-radius:999px;background:rgba(232,199,122,.18);color:#E8C77A;font-size:22px;font-weight:700}
+.x3k{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:18px 0 6px}
+.x3k div{border-radius:20px;background:rgba(244,242,234,.07);padding:16px;text-align:center}.x3k b{display:block;font-size:50px;line-height:1.1;font-variant-numeric:tabular-nums}.x3k span{font-size:19px;color:#C7D3D1}
+.x3d .opt{min-height:68px;font-size:24px}
+.x3bar .brow{margin:9px 0;grid-template-columns:118px 1fr 92px;font-size:21px}.x3bar .brow i{height:24px}
+
+.brow i.hi{background:var(--blue)}
