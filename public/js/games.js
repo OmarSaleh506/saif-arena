@@ -446,7 +446,9 @@ RUN.b2_flat = api => {
 RUN.b3 = api => {
   const SRT = 30, GOAL = 5, CAP = 11, block = [8, 9, 14, 20, 21, 27], wind = [12, 18, 33, 34, 3];
   const cost = i => wind.includes(i) ? 2 : 1, adj = (a, b) => Math.abs(a - b) === 6 || (Math.abs(a - b) === 1 && Math.floor(a / 6) === Math.floor(b / 6));
-  let path = [SRT], over = false;
+  let path = [SRT], over = false, prevPos = null;
+  const cellXY = i => ({ x: 960 + (5 - (i % 6)) * 121.667 + 55.8, y: 290 + Math.floor(i / 6) * 121.667 + 55.8 });
+  const DRONE = '<svg viewBox="-60 -60 120 120" width="118" height="118"><ellipse cx="0" cy="46" rx="30" ry="7" fill="#000" opacity=".28"/><g stroke="#F4F2EA" stroke-width="7" stroke-linecap="round"><path d="M-14-14L-38-38M14-14L38-38M-14 14L-38 38M14 14L38 38"/></g>' + [[-38,-38],[38,-38],[-38,38],[38,38]].map(([x,y],k)=>`<g transform="translate(${x} ${y})"><circle r="7" fill="#173B3A" stroke="#F4F2EA" stroke-width="3"/><g><ellipse rx="24" ry="3.4" fill="#84B6C6" opacity=".75"/><animateTransform attributeName="transform" type="rotate" from="${k*40}" to="${k*40+360}" dur=".16s" repeatCount="indefinite"/></g></g>`).join('') + '<rect x="-19" y="-19" width="38" height="38" rx="13" fill="#F4F2EA" stroke="#081A19" stroke-width="3"/><circle cx="0" cy="6" r="8" fill="#173B3A" stroke="#84B6C6" stroke-width="3"/><circle cx="0" cy="6" r="3" fill="#84B6C6"/><circle cx="0" cy="-11" r="3.6" fill="#C9705F"><animate attributeName="opacity" values="1;.2;1" dur="1s" repeatCount="indefinite"/></circle></svg>';
   const draw = () => {
     const bat = CAP - path.slice(1).reduce((s, i) => s + cost(i), 0), last = path[path.length - 1], won = last === GOAL && bat >= 0, dead = bat < 0;
     let cells = '';
@@ -454,18 +456,20 @@ RUN.b3 = api => {
       const isB = block.includes(i), isW = wind.includes(i), inP = path.includes(i), can = !won && !dead && !isB && !inP && adj(last, i);
       let cls = 'dc' + (isB ? ' blk' : isW ? ' wind' : '') + (can ? ' can' : '') + (inP ? (dead ? ' dead' : ' path') : ''), mark = isB ? I('X') : isW ? '≋' : '';
       if (inP) mark = String(path.indexOf(i));
-      if (i === SRT) { cls += ' start'; mark = I('Plane'); }
+      if (i === SRT) { cls += ' start'; mark = 'H'; }
       if (i === GOAL) { cls += ' goal' + (won ? ' won' : ''); mark = I('MapPin'); }
       cells += `<button class="${cls}" data-c="${i}" aria-label="خانة ${i + 1}">${mark}</button>`;
     }
     api.el.innerHTML = `<div class="dh"><h2>أوصل الدرون <span class="grad">قبل نفاد البطارية</span></h2><div class="pill" style="font-size:24px">بلاغ 03 · الدرونز</div></div>
       <div class="dgrid">${cells}</div>
       <div class="card side" style="top:290px;left:64px;width:560px;height:720px">
-        <div style="display:flex;justify-content:space-between;font-size:26px"><span>${I('BatteryMedium')} البطارية</span><b>${Math.max(0, bat)} / 11</b></div>
-        <div class="bar" style="height:22px;margin:14px 0 26px"><i style="width:${Math.max(0, bat / CAP * 100)}%;background:${bat <= 3 ? 'var(--bad)' : 'var(--blue)'}"></i></div>
+        <div style="display:flex;justify-content:space-between;font-size:26px"><span>${I('BatteryMedium')} البطارية</span><b>${Math.max(0, bat)} / 11 وحدة</b></div>
+        <div class="units">${Array.from({ length: CAP }, (_, k) => `<i class="${k < bat ? (bat <= 3 ? 'lo' : 'on') : ''}"></i>`).join('')}</div>
         <div class="fi ${won ? '' : dead ? 'bad' : 'empty'}" style="margin-top:0"><span>${I(won ? 'CircleCheck' : dead ? 'CircleX' : 'Hand')}</span><div><b>${won ? 'وصل الدرون!' : dead ? 'نفدت البطارية' : 'المس خانة مجاورة'}</b>${won ? `متبقي ${bat} وحدات` : dead ? 'تراجع وجرّب طريقًا آخر' : 'الخانات المتاحة محددة بخط متقطع'}</div></div>
         <div class="leg"><span><i style="background:#1E3A5F">≋</i> رياح: وحدتان</span><span><i style="background:#2A3340"></i> منطقة محظورة</span><span><i style="background:var(--line2)"></i> خانة عادية: وحدة</span></div>
         <div style="display:flex;gap:14px;margin-top:26px"><button class="btn ghost" id="un" style="flex:1">${I('Undo2')} تراجع</button><button class="btn ghost" id="rs" style="flex:1">${I('RotateCcw')} من جديد</button></div></div>`;
+    const to = cellXY(last), from = prevPos || to; api.el.insertAdjacentHTML('beforeend', `<div class="drone" id="dr" style="left:${from.x}px;top:${from.y}px">${DRONE}</div>`);
+    const dr = $('#dr'); requestAnimationFrame(() => requestAnimationFrame(() => { if (!dr.isConnected) return; dr.style.left = to.x + 'px'; dr.style.top = to.y + 'px'; dr.style.transform = `translate(-50%,-50%) rotate(${Math.max(-18, Math.min(18, (to.x - from.x) / 6))}deg)`; setTimeout(() => { dr.style.transform = 'translate(-50%,-50%)'; }, 420); })); prevPos = to;
     $$('[data-c]').forEach(b => b.onclick = () => { const i = +b.dataset.c; if (!won && !dead && !block.includes(i) && !path.includes(i) && adj(last, i)) { path.push(i); draw(); } });
     $('#un').onclick = () => { if (path.length > 1 && !over) { path.pop(); draw(); } };
     $('#rs').onclick = () => { if (!over) { path = [SRT]; draw(); } };

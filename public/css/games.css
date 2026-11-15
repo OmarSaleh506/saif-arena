@@ -245,3 +245,10 @@ body{background:#081A19;font-family:var(--f);overflow:hidden;padding-left:max(0p
 .x3bar .brow{margin:9px 0;grid-template-columns:118px 1fr 92px;font-size:21px}.x3bar .brow i{height:24px}
 
 .brow i.hi{background:var(--blue)}
+
+.drone{position:absolute;width:118px;height:118px;transform:translate(-50%,-50%);transition:left .55s cubic-bezier(.4,.1,.2,1),top .55s cubic-bezier(.4,.1,.2,1),transform .4s;pointer-events:none;z-index:2;filter:drop-shadow(0 10px 8px rgba(0,0,0,.35));animation:dbob 1.6s ease-in-out infinite}
+.drone svg{display:block}
+@keyframes dbob{0%,100%{margin-top:-4px}50%{margin-top:5px}}
+.units{display:grid;grid-template-columns:repeat(11,1fr);gap:7px;margin:14px 0 26px}
+.units i{height:34px;border-radius:7px;background:rgba(244,242,234,.1);border:1px solid rgba(244,242,234,.14);transition:background .25s}
+.units i.on{background:var(--blue);border-color:var(--blue)}.units i.lo{background:var(--bad);border-color:var(--bad)}
