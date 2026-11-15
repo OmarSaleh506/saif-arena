@@ -204,7 +204,8 @@ function result(o) {
 }
 function renderResult() {
   const r = view.res, { g, o, score, t } = r, scr = view.screen, closed = SaifStore.stats().closed, pl = KIOSK ? { name: '', phone: '' } : SaifStore.player();
-  const lIcons = ['Lock', 'Eye', 'ShieldAlert', 'Fingerprint'];
+  const lIcons = ['Lock', 'Eye', 'ShieldAlert', 'Fingerprint'], first = !r.celebrated;
+  const coinUrl = siteUrl().replace(/[?#].*$/, '').replace(/[^/]*$/, '') + `coin.html?g=${encodeURIComponent(g.id)}&t=${t[0]}&s=${score}`;
   const form = r.saved ? `<div class="sa-saved">${I('CircleCheck')}<span>تم تسجيلك باسم <b>${esc(r.saved.name)}</b> · المركز <b>#${r.rank}</b> اليوم</span></div>`
     : closed ? `<p class="sa-banner">${I('Lock')} انتهت فعالية اليوم، لا يمكن تسجيل أسماء جديدة في الصدارة.</p>`
     : `<form class="sa-form" id="idf" novalidate>
@@ -214,19 +215,18 @@ function renderResult() {
         <p class="sa-err" id="err" role="alert" hidden></p>
         <button type="submit" class="sa-btn">${I('Trophy')} سجّل اسمي في الصدارة</button></form>`;
   app.innerHTML = `${header()}<div class="sa-layout"><main class="sa-main"><section class="sa-result">
-    <article class="sa-glass sa-score"><p class="sa-rhead">${o.timeout ? 'انتهى الوقت، وحصلت على شارة' : esc(o.head || 'أحسنت! حصلت على شارة')}</p>
-      ${hex(g.icon, t)}<h2>${esc(g.badge)}</h2><p class="sa-rlevel" style="color:${t[2]}">المستوى ${t[1]}${o.detail ? ' · ' + esc(o.detail) : ''}</p>
+    <article class="sa-glass sa-score"><p class="sa-rhead">${o.timeout ? 'انتهى الوقت، وحصلت على عملة' : esc(o.head || 'أحسنت! حصلت على عملة')}</p>
+      <div class="cn-stage ${first ? 'cn-drop' : ''}" id="cnst">${coinHTML(g, t[0], 'lg', true)}</div><h2>${esc(g.badge)}</h2><p class="sa-rlevel" style="color:${t[2]}">المستوى ${t[1]}${o.detail ? ' · ' + esc(o.detail) : ''}</p>
       <div class="sa-big"><b class="grad">${score}</b><span>نقطة</span></div><p class="sa-rank">${r.saved ? 'ترتيبك' : 'ترتيبك المتوقع'} <b>#${r.rank}</b> اليوم</p>
       <div id="idwrap">${form}</div>
       <div class="sa-acts"><button type="button" class="sa-btn" id="ag">${I('RotateCcw')} العب مرة أخرى</button><button type="button" class="sa-btn ghost" id="ot">${I('House')} تحدٍّ آخر</button></div>
       ${KIOSK ? '<p class="sa-muted" id="bk"></p>' : ''}</article>
     <article class="sa-glass sa-learn"><h3>ماذا <span class="grad">تعلّمت؟</span></h3>${g.learn.map((l, i) => `<div class="sa-lii"><span class="k">${I(lIcons[i % 4])}</span><div>${esc(l)}</div></div>`).join('')}</article>
-    <article class="sa-glass sa-bag"><h3><span class="coral">${I('Backpack')}</span> حقيبتك <span class="grad">المعرفية</span></h3>
-      <div class="sa-qr">${qrSvg(playUrl())}</div><p class="sa-cap">امسح الرمز وافتح ساحة سيف في جوالك</p>
-      <div class="sa-inc"><span><i class="coral">${I('Award')}</i> شارتك</span><span><i>${I('GraduationCap')}</i> منصة سطر</span><span><i>${I('Library')}</i> مكتبة طويق</span><span><i>${I('Swords')}</i> تحديات طويق</span></div></article>
+    <article class="sa-glass sa-bag"><h3><span class="coral">${I('Award')}</span> خذ <span class="grad">عملتك</span> معك</h3>
+      <div class="sa-qr">${qrSvg(coinUrl)}</div><p class="sa-cap">امسح الرمز بجوالك لتحمّل عملة «${esc(g.badge)}» كصورة</p></article>
   </section></main><aside class="sa-side" id="side">${boardPanel(boardHL)}</aside></div>${footer()}`;
   bindShell();
-  if (!r.celebrated && t[0] !== 'bronze') { r.celebrated = true; confetti(t); }
+  if (first) { r.celebrated = true; coinCelebrate($('#cnst', app), t[0]); if (t[0] !== 'bronze') confetti(t); }
   const back = () => { view = { name: 'home', screen: scr }; location.hash = 's' + scr; render(); window.scrollTo(0, 0); };
   $('#ag', app).onclick = () => start(g.id);
   $('#ot', app).onclick = back;

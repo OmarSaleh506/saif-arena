@@ -1,0 +1,47 @@
+/* ===== عملة ساحة سيف ===== */
+.cn{--g1:#fff3b0;--g2:#f2c94c;--g3:#c8932a;--g4:#7a4e12;--rim:#b57d1c;--rim2:#ffe38a;--ink:#6b440e;--s:1;width:calc(220px*var(--s));height:calc(220px*var(--s));position:relative;transform-style:preserve-3d;font-family:Tajawal,system-ui,sans-serif}
+.cn.t-silver{--g1:#ffffff;--g2:#e3e9ec;--g3:#a2aeb3;--g4:#5d686d;--rim:#8d999e;--rim2:#f4f8fa;--ink:#3e494e}
+.cn.t-bronze{--g1:#ffdcbc;--g2:#e0995e;--g3:#ab6238;--g4:#5a2f18;--rim:#8e4f2b;--rim2:#f3b98d;--ink:#4a2411}
+.cn.sm{--s:.34}.cn.md{--s:.62}.cn.lg{--s:1.25}
+.cn .layer,.cn .face,.cn .edge{position:absolute;inset:0;border-radius:50%}
+.cn .layer{background:var(--g3)}
+.cn .edge{background:conic-gradient(from 0deg,var(--g4),var(--g1),var(--g3),var(--g1),var(--g4),var(--g1),var(--g3),var(--g1),var(--g4))}
+.cn .face{display:flex;flex-direction:column;align-items:center;justify-content:center;backface-visibility:hidden;overflow:hidden;
+ background:radial-gradient(circle at 32% 26%,var(--g1) 0,var(--g2) 38%,var(--g3) 72%,var(--g4) 100%);
+ box-shadow:inset 0 0 0 calc(7px*var(--s)) var(--rim),inset 0 0 0 calc(11px*var(--s)) var(--rim2),inset 0 0 calc(24px*var(--s)) rgba(60,30,0,.45)}
+.cn .face::before{content:"";position:absolute;inset:calc(15px*var(--s));border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(90,50,8,.5) 0 2deg,transparent 2deg 6deg);-webkit-mask:radial-gradient(circle,transparent 70%,#000 71%);mask:radial-gradient(circle,transparent 70%,#000 71%)}
+.cn .face::after{content:"";position:absolute;inset:calc(34px*var(--s));border-radius:50%;border:calc(3px*var(--s)) solid rgba(90,50,8,.5);box-shadow:0 calc(2px*var(--s)) 0 rgba(255,244,190,.7)}
+.cn .front{transform:translateZ(calc(8px*var(--s)))}.cn .back{transform:rotateY(180deg) translateZ(calc(8px*var(--s)))}
+.cn .logo{width:56%;position:relative;z-index:1;filter:brightness(0) sepia(1) saturate(2.4) hue-rotate(-12deg) brightness(.55) drop-shadow(0 calc(2px*var(--s)) 0 rgba(255,240,170,.85));opacity:.92}
+.cn.t-silver .logo{filter:brightness(0) opacity(.62) drop-shadow(0 calc(2px*var(--s)) 0 rgba(255,255,255,.9))}
+.cn.t-bronze .logo{filter:brightness(0) sepia(1) saturate(3) hue-rotate(-25deg) brightness(.4) drop-shadow(0 calc(2px*var(--s)) 0 rgba(255,210,170,.8))}
+.cn .bi{position:relative;z-index:1;color:var(--ink);font-size:calc(74px*var(--s));line-height:1;filter:drop-shadow(0 calc(2px*var(--s)) 0 rgba(255,244,190,.85))}
+.cn .bi .ic{display:block}.cn .bi svg{width:1em;height:1em;stroke-width:1.7}
+.cn .bl{position:relative;z-index:1;color:var(--ink);font-weight:800;text-align:center;line-height:1.15;text-shadow:0 calc(1.5px*var(--s)) 0 rgba(255,244,190,.8)}
+.cn .bl.a{font-size:calc(17px*var(--s));margin-top:calc(4px*var(--s));opacity:.8}.cn .bl.b{font-size:calc(20px*var(--s));max-width:76%;margin-top:calc(2px*var(--s))}
+.cn .shine{position:absolute;inset:0;border-radius:50%;z-index:2;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.55) 48%,transparent 60%);background-size:260% 100%;animation:cnsh 3.2s linear infinite;mix-blend-mode:overlay}
+@keyframes cnsh{from{background-position:130% 0}to{background-position:-130% 0}}
+@keyframes cnidle{to{transform:rotateY(360deg)}}
+.cn.spin{animation:cnidle 6s linear infinite}
+/* دخول: سقوط + قلب + استقرار */
+.cn-wrap{display:inline-block;transform-style:preserve-3d}
+.cn-drop .cn-wrap,.cn-wrap.drop{animation:cndrop 1.5s cubic-bezier(.3,.7,.3,1) both}
+@keyframes cndrop{0%{transform:translateY(-520px) scale(.5);opacity:0}25%{opacity:1}55%{transform:translateY(0) scale(1.18)}72%{transform:translateY(-34px) scale(1)}88%{transform:translateY(0) scale(1.04)}100%{transform:translateY(0) scale(1)}}
+.cn-drop .cn,.cn.flip{animation:cnflip 2.4s cubic-bezier(.2,.75,.2,1) both,cnidle 7s linear 2.4s infinite}
+@keyframes cnflip{from{transform:rotateY(0) rotateX(18deg)}to{transform:rotateY(1800deg) rotateX(0)}}
+.cn-stage{perspective:1000px;height:290px;display:grid;place-items:center;position:relative;margin:.2rem 0 .4rem}
+.cn-stage::before{content:"";position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(232,199,122,.38),transparent 68%);animation:cnglow 2.4s ease-in-out infinite}
+@keyframes cnglow{50%{transform:scale(1.15);opacity:.65}}
+.cn-stage .sp{position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px;background:#fff6c4;clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);opacity:0;animation:cnsp 1.3s ease-out forwards;animation-delay:var(--d,1.1s)}
+@keyframes cnsp{0%{opacity:0;transform:rotate(var(--a)) translateX(40px) scale(.2)}25%{opacity:1}100%{opacity:0;transform:rotate(var(--a)) translateX(var(--r,150px)) scale(1.3)}}
+.cn-stage .ring{position:absolute;width:230px;height:230px;border-radius:50%;border:4px solid rgba(255,243,176,.9);opacity:0;animation:cnring 1.2s ease-out forwards;animation-delay:1.05s}
+@keyframes cnring{0%{opacity:.9;transform:scale(.6)}100%{opacity:0;transform:scale(2.1)}}
+/* مطر العملات */
+.cn-rain{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:60}
+.cn-rain i{position:absolute;top:-60px;width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 32% 26%,var(--g1,#fff3b0),var(--g2,#f2c94c) 45%,var(--g3,#c8932a) 80%);box-shadow:inset 0 0 0 3px var(--rim,#b57d1c),0 4px 8px rgba(0,0,0,.35);animation:cnfall var(--t,2.8s) cubic-bezier(.4,.1,.6,1) forwards,cnwob .45s ease-in-out infinite alternate;animation-delay:var(--dl,0s),var(--dl,0s)}
+.cn-rain i::after{content:"";position:absolute;inset:8px;border-radius:50%;border:2px solid rgba(110,70,10,.5)}
+@keyframes cnfall{to{transform:translate(var(--dx,0),calc(100vh + 120px)) rotate(var(--r,0deg))}}
+@keyframes cnwob{from{scale:1 1}to{scale:.15 1}}
+.cn-qrcard{display:flex;flex-direction:column;align-items:center;gap:.5rem}
+@media (prefers-reduced-motion:reduce){.cn-rain{display:none}.cn-drop .cn-wrap{animation:none}.cn-drop .cn{animation:cnidle 14s linear infinite}}
+.cn .bl.b.l{font-size:calc(16px*var(--s))}
