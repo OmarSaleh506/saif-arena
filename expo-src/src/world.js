@@ -94,7 +94,7 @@ export function buildWorld(scene, q) {
   }
   /* لافتات المداخل */
   DOORS.forEach((x, i) => { const p = labelPlane('المدخل ' + (4 - i), 9, 2.4, { size: 70, border: '#C9705F' }); p.position.set(x, 9.2, 62.4); B.add(p); });
-  const mainSign = labelPlane('معرض ساحة سيف', 40, 5.6, { bg: 'rgba(8,26,25,.9)', size: 86 }); mainSign.position.set(0, 12.2, 68.4); B.add(mainSign);
+  const mainSign = labelPlane('معرض تجارب طويق التفاعلية', 46, 5.6, { bg: 'rgba(8,26,25,.9)', size: 86 }); mainSign.position.set(0, 12.2, 68.4); B.add(mainSign);
 
   /* أرضيات القاعات والمسرح والممر */
   for (const k of Object.keys(HALLS)) {
@@ -153,7 +153,7 @@ export function buildWorld(scene, q) {
 
   /* ---------- المسرح والمقاعد ---------- */
   B.add(box(36, 1.4, 8, std({ color: 0x1c2026, roughness: .5, metalness: .3 }), -71, .9, -26));
-  const led = new THREE.Mesh(new THREE.PlaneGeometry(30, 8), new THREE.MeshBasicMaterial({ toneMapped: false, map: (() => { const t = ctex(1024, 272, (c, w, h) => { const g = c.createLinearGradient(0, 0, w, h); g.addColorStop(0, '#0d3b66'); g.addColorStop(.5, '#1b6a8a'); g.addColorStop(1, '#C9705F'); c.fillStyle = g; c.fillRect(0, 0, w, h); c.fillStyle = '#fff'; c.font = '800 130px Tajawal, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('ساحة سيف', w / 2, h / 2 - 16); c.font = '600 44px Tajawal, sans-serif'; c.fillText('SAIF ARENA 2026', w / 2, h - 46); }, { srgb: true }); t.repeat.set(1, 1); return t; })() }));
+  const led = new THREE.Mesh(new THREE.PlaneGeometry(30, 8), new THREE.MeshBasicMaterial({ toneMapped: false, map: (() => { const t = ctex(1024, 272, (c, w, h) => { const g = c.createLinearGradient(0, 0, w, h); g.addColorStop(0, '#0d3b66'); g.addColorStop(.5, '#1b6a8a'); g.addColorStop(1, '#C9705F'); c.fillStyle = g; c.fillRect(0, 0, w, h); c.fillStyle = '#fff'; c.font = '800 100px Tajawal, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('تجارب طويق التفاعلية', w / 2, h / 2 - 16); c.font = '600 44px Tajawal, sans-serif'; c.fillText('SAIF ARENA 2026', w / 2, h - 46); }, { srgb: true }); t.repeat.set(1, 1); return t; })() }));
   led.position.set(-71, 6.4, -29.6); B.add(led);
   [-86, -56].forEach(x => B.add(box(.5, 9.6, .5, M.darkSteel, x, 4.8, -29)));
   B.add(box(32, .5, .5, M.darkSteel, -71, 10, -27));

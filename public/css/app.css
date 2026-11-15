@@ -1,4 +1,4 @@
-/* ساحة سيف — القشرة المرنة. وحدات rem تتحجّم تلقائيًا من الجوال حتى شاشة 4K */
+/* تجارب طويق التفاعلية — القشرة المرنة. وحدات rem تتحجّم تلقائيًا من الجوال حتى شاشة 4K */
 :root{--bg:#081A19;--glass:rgba(244,242,234,.05);--glass-b:rgba(244,242,234,.13);--tr:201,112,95}
 html{height:auto;font-size:clamp(15px,calc(.5vw + 9.5px),40px);-webkit-text-size-adjust:100%}
 body{height:auto;min-height:100dvh;margin:0;overflow-x:hidden;overflow-y:auto;background:var(--bg);color:var(--cream);font-family:var(--f);line-height:1.55;

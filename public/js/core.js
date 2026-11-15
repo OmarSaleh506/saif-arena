@@ -1,4 +1,4 @@
-/* أدوات مشتركة: مبنية على نفس أدوات ساحة سيف الأصلية (الألعاب تعتمد عليها بنفس الأسماء) */
+/* أدوات مشتركة: مبنية على نفس أدوات الأصلية (الألعاب تعتمد عليها بنفس الأسماء) */
 const LOGO = 'img/saif-logo.png';
 const I = n => `<span class="ic">${ICONS[n] || ''}</span>`;
 const inner = n => (ICONS[n] || '').replace(/^<svg[^>]*>|<\/svg>$/g, '');
@@ -33,4 +33,4 @@ function toast(m) {
 }
 function shake(el) { if (!el) return; el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
 const fmt = s => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
-const topbar = (sub, hud) => `<div class="top"><div class="brand"><img src="${LOGO}" alt="سيف"><div><div class="nm">ساحة سيف</div><div class="sub">${esc(sub)}</div></div></div><div class="hud">${hud}</div></div>`;
+const topbar = (sub, hud) => `<div class="top"><div class="brand"><img src="${LOGO}" alt="سيف"><div><div class="nm">تجارب طويق التفاعلية</div><div class="sub">${esc(sub)}</div></div></div><div class="hud">${hud}</div></div>`;

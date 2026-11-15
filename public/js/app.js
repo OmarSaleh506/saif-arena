@@ -1,4 +1,4 @@
-/* قشرة ساحة سيف: الرئيسية (شاشتان) + لوحة المتصدرين الجانبية + النتيجة + تشغيل التجارب */
+/* قشرة تجارب طويق التفاعلية: الرئيسية (شاشتان) + لوحة المتصدرين الجانبية + النتيجة + تشغيل التجارب */
 const app = document.getElementById('app');
 const KIOSK = new URLSearchParams(location.search).has('kiosk');
 /* وضع الجوال: يفتحه الزائر من QR الزحمة، ويُظهر التبديل بين المحورين */
@@ -8,15 +8,15 @@ const MOBILE = new URLSearchParams(location.search).has('m') || window.innerWidt
 const SCREENS = {
   1: { n: 1, tone: 'coral', icon: 'ShieldCheck', icons: ['Puzzle', 'Bug', 'Fingerprint', 'ShieldAlert'], name: 'درع سيف',
     topic: 'الأمن السيبراني', kicker: 'الشاشة 1 · الأمن السيبراني', title: 'احمِ الفضاء الرقمي',
-    hook: 'فكّ الشيفرات، صُدّ الهجمات، واكشف المتسلل قبل أن يصل إلى الخادم.',
+    hook: 'ركّب الرسالة الأمنية، وصمّم المسار الآمن، وصُدّ الهجمات، وتتبّع المخترق بين الأدلة والسجلات.',
     sections: [
-      { icon: 'Puzzle', title: 'فكّ الشيفرة', sub: 'ألغاز وشبكات تختبر ذكاءك قبل أن يسبقك المخترق', games: ['puzzle', 'network'] },
-      { icon: 'Swords', title: 'في قلب المعركة', sub: 'اخترق تطبيقًا لتعرف نقاط ضعفه، ثم أغلقها وصُدّ الهجوم', games: ['vuln', 'defend'] },
+      { icon: 'Puzzle', title: 'فكّ اللغز', sub: 'ركّب الرسالة الأمنية وصمّم مسارًا آمنًا قبل أن يسبقك المخترق', games: ['puzzle', 'network'] },
+      { icon: 'Swords', title: 'في قلب المعركة', sub: 'اكشف ثغرات التطبيق قبل المهاجم، ثم صُدّ الهجمات عن الخادم', games: ['vuln', 'defend'] },
       { icon: 'Search', title: 'غرفة التحقيق', sub: 'تتبّع الأدلة واكشف المتسلل المختبئ بين السجلات', games: ['forensic', 'b5'] },
     ] },
   2: { n: 2, tone: 'blue', icon: 'Bot', icons: ['Eye', 'Cpu', 'Plane', 'Radar'], name: 'عقل سيف',
     topic: 'الذكاء الاصطناعي والبيانات', kicker: 'الشاشة 2 · الذكاء الاصطناعي والبيانات', title: 'علّم الآلة وابنِ مدينة المستقبل',
-    hook: 'اكشف المزيّف، درّب نموذجًا، وشغّل مدينة ذكية بالدرونز والروبوتات.',
+    hook: 'اكشف المزيّف، درّب نموذجًا، وحلّل البيانات، وابنِ مدينة ذكية بالرؤية والدرونز والروبوتات.',
     sections: [
       { icon: 'Eye', title: 'هل تثق بما ترى؟', sub: 'ميّز الحقيقي من المولّد بالذكاء الاصطناعي، وجِد الشاذ بين مئات النقاط', games: ['deepfake', 'pattern'] },
       { icon: 'Lightbulb', title: 'درّب عقلًا آليًا', sub: 'صنّف الرسائل وحلّل بيانات الزوار، وشاهد القرار يتحسّن', games: ['ml', 'b2'] },
@@ -40,7 +40,7 @@ function parseHash() {
   return { name: 'home', screen: m ? Math.min(2, +m[1]) : view.screen || 1 };
 }
 
-/* ---------- شارة النتيجة (من ساحة سيف الأصلية) ---------- */
+/* ---------- شارة النتيجة (من الأصلية) ---------- */
 function tier(r) { return r >= 0.85 ? ['gold', 'الذهبي', '#E8C77A', '#B8893A'] : r >= 0.6 ? ['silver', 'الفضي', '#DCE3E2', '#9AA9A7'] : ['bronze', 'البرونزي', '#E2A37E', '#A9603F']; }
 const TIER_AR = { gold: 'الذهبي', silver: 'الفضي', bronze: 'البرونزي' };
 function hex(icon, t) {
@@ -50,7 +50,7 @@ function hex(icon, t) {
   <text x="100" y="176" text-anchor="middle" font-family="Tajawal,sans-serif" font-weight="800" font-size="20" fill="${t[2]}" direction="ltr">SAIF 2026</text></svg>`;
 }
 function qrSvg(text) {
-  try { const q = qrcode(0, 'M'); q.addData(text); q.make(); return q.createSvgTag({ cellSize: 4, margin: 0, scalable: true, alt: 'رمز QR لفتح ساحة سيف' }); } catch (e) { return ''; }
+  try { const q = qrcode(0, 'M'); q.addData(text); q.make(); return q.createSvgTag({ cellSize: 4, margin: 0, scalable: true, alt: 'رمز QR لفتح تجارب طويق التفاعلية' }); } catch (e) { return ''; }
 }
 const siteUrl = () => SaifStore.config().publicUrl || (location.origin + location.pathname);
 const playUrl = () => siteUrl().replace(/[?#].*$/, '') + '?m=1';
@@ -59,7 +59,7 @@ const medal = n => `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden=
 /* ---------- مكوّنات مشتركة ---------- */
 function header() {
   const fs = document.fullscreenEnabled ? `<button type="button" class="sa-chip" id="fs" aria-label="ملء الشاشة">${I('Monitor')}<span>ملء الشاشة</span></button>` : '';
-  return `<header class="sa-top"><a class="sa-brand" href="#s${view.screen || 1}"><img src="${LOGO}" alt=""><span><b>ساحة سيف</b><small>${SCREENS[view.screen || 1].topic}</small></span></a><div class="sa-top-acts">${fs}</div></header>`;
+  return `<header class="sa-top"><a class="sa-brand" href="#s${view.screen || 1}"><img src="${LOGO}" alt=""><span><b>تجارب طويق التفاعلية</b><small>${SCREENS[view.screen || 1].topic}</small></span></a><div class="sa-top-acts">${fs}</div></header>`;
 }
 const crowdBlock = () => (SaifStore.config().crowd && !MOBILE) ? `<div class="sa-crowd"><div class="sa-crowd-qr">${qrSvg(playUrl())}</div><div><b>${I('QrCode')} الدور طويل؟ العب من جوالك</b><small>امسح الرمز وسجّل نتيجتك، وتظهر هنا في الصدارة.</small></div></div>` : '';
 function boardPanel(hl) {
@@ -136,7 +136,7 @@ function miniBoard() {
   if (!rows.length) return `<span class="sa-mini-t">${I('Trophy')} الصدارة تنتظر بطلها</span>`;
   return `<span class="sa-mini-t">${I('Trophy')} المتصدرون</span>${rows.map(r => `<span class="sa-mini-r r${r.rank}"><b>${r.rank}</b>${esc(r.name)}<em>${r.score}</em></span>`).join('')}`;
 }
-const footer = () => `<footer class="sa-foot"><img src="${LOGO}" alt=""><span>ساحة سيف · SAIF 2026</span><small>الأمن السيبراني والذكاء الاصطناعي</small></footer>`;
+const footer = () => `<footer class="sa-foot"><img src="${LOGO}" alt=""><span>تجارب طويق التفاعلية · SAIF 2026</span><small>الأمن السيبراني والذكاء الاصطناعي</small></footer>`;
 function confetti(t) {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const host = document.createElement('div'); host.className = 'sa-confetti'; document.body.appendChild(host);
@@ -249,7 +249,7 @@ function renderResult() {
 
 /* ---------- التوجيه ---------- */
 function render() {
-  document.title = 'ساحة سيف'; app.hidden = playing(); app.onpointerdown = app.onkeydown = null;
+  document.title = 'تجارب طويق التفاعلية'; app.hidden = playing(); app.onpointerdown = app.onkeydown = null;
   document.body.classList.toggle('is-admin', view.name === 'admin');
   if (view.name === 'result' && view.res) return renderResult();
   if (view.name === 'admin') { clearTimeout(autoBack); return AdminView.render(app); }
