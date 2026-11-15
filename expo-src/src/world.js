@@ -39,7 +39,7 @@ export function buildWorld(scene, q) {
     darkSteel: std({ color: 0x2a3036, roughness: .45, metalness: .7 }),
     dark: std({ color: 0x1b2024, roughness: .6 }),
     glass: std({ color: 0x7db3c8, roughness: .06, metalness: .55, transparent: true, opacity: .46, emissive: 0xffc678, emissiveIntensity: 0, depthWrite: false }),
-    roofGhost: std({ color: 0xffffff, transparent: true, opacity: .13, roughness: .5, depthWrite: false }),
+    roofGhost: std({ color: 0xc4cad0, transparent: true, opacity: .2, roughness: .5, depthWrite: false }),
     asphalt: std({ map: T.asphalt, roughness: .95 }),
     lamp: std({ color: 0x222, emissive: 0xffe2a8, emissiveIntensity: 0, roughness: .4 }),
     signGlow: std({ color: 0x111, emissive: 0xffffff, emissiveIntensity: 0 }),
@@ -234,17 +234,26 @@ export function buildWorld(scene, q) {
   S.add(box(110, .06, .5, std({ color: 0xf2c230, roughness: .8 }), 0, 1.13, MZ.st - 2.8, { cast: false })); S.add(box(110, .06, .5, std({ color: 0xf2c230, roughness: .8 }), 0, 1.13, MZ.st + 2.8, { cast: false }));
   S.add(box(110, .4, 11, M.white, 0, 6.4, MZ.st)); const stCol = new THREE.InstancedMesh(new THREE.CylinderGeometry(.22, .22, 5.8, 10), M.steel, 12);
   for (let i = 0; i < 12; i++) { o.position.set(-50 + i * 9.1, 3.5, MZ.st + (i % 2 ? 3 : -3)); o.rotation.set(0, 0, 0); o.scale.set(1, 1, 1); o.updateMatrix(); stCol.setMatrixAt(i, o.matrix); } S.add(stCol);
-  S.add(box(42, 7.5, 10, M.glass, 0, 3.75, 199)); S.add(box(42, .7, 11, M.white, 0, 7.9, 199)); S.add(box(42, 7.4, .6, M.darkSteel, 0, 3.7, 204.2));
-  const ms = labelPlane('محطة المترو', 22, 4.2, { size: 92, border: '#84B6C6', bg: 'rgba(10,40,60,.95)' }); ms.position.set(0, 10.4, 193.8); S.add(ms);
+  S.add(box(42, 7.5, 10, std({ color: 0x4a4f55, roughness: .45, metalness: .6 }), 0, 4.5, 199)); S.add(box(44, .8, 12, std({ color: 0x8a9096, roughness: .4, metalness: .7 }), 0, 9.3, 199));
+  const lv = new THREE.InstancedMesh(new THREE.BoxGeometry(42.2, .18, .5), M.steel, 14); for (let i = 0; i < 14; i++) { d0.position.set(0, 1.5 + i * .6, 193.9); d0.updateMatrix(); lv.setMatrixAt(i, d0.matrix); } S.add(lv);
+  S.add(box(14, 5, .4, M.glass, 0, 2.6, 193.7)); S.add(box(16, .5, 4, M.white, 0, 5.4, 192));
+  /* جسر المشاة المغطى بين المحطة والمعرض */
+  const BZ0 = 70, BZ1 = 195, BL = BZ1 - BZ0, BM = (BZ0 + BZ1) / 2;
+  S.add(box(9, .7, BL, std({ color: 0x8d9298, roughness: .5, metalness: .5, transparent: true, opacity: .55 }), 0, 11, BM, { cast: false }));
+  S.add(box(9.4, .3, BL, M.roofGhost, 0, 14.6, BM, { cast: false })); S.add(box(.25, 3.2, BL, M.glass, -4.4, 12.8, BM, { cast: false })); S.add(box(.25, 3.2, BL, M.glass, 4.4, 12.8, BM, { cast: false }));
+  S.add(box(.3, .3, BL, M.steel, -4.4, 14.3, BM, { cast: false })); S.add(box(.3, .3, BL, M.steel, 4.4, 14.3, BM, { cast: false })); S.add(box(.3, .3, BL, M.steel, -4.4, 11.3, BM, { cast: false })); S.add(box(.3, .3, BL, M.steel, 4.4, 11.3, BM, { cast: false }));
+  const bc = new THREE.InstancedMesh(new THREE.CylinderGeometry(.5, .6, 10.6, 12), M.concrete, 8); bc.castShadow = true; for (let i = 0; i < 8; i++) { d0.position.set(0, 5.3, BZ0 + 8 + i * 17); d0.updateMatrix(); bc.setMatrixAt(i, d0.matrix); } S.add(bc);
+  const bs = labelPlane('جسر المترو ⟵ المعرض', 12, 1.8, { size: 52, border: '#84B6C6' }); bs.position.set(0, 13, 69.6); S.add(bs);
+  const ms = labelPlane('محطة المترو', 22, 4.2, { size: 92, border: '#5fd08a', bg: 'rgba(10,40,30,.95)' }); ms.position.set(0, 11.6, 193.6); S.add(ms);
   const msg = labelSprite('المعرض 🡐 المترو', { w: 512, h: 128, size: 54, scale: 12, border: '#84B6C6' }); msg.position.set(0, 7, 150); S.add(msg); W.metroSign = msg;
   /* القطار */
   const carG = (() => {
-    const body = new THREE.BoxGeometry(19, 3.1, 3); body.translate(0, 2.3, 0); colorGeo(body, 0xf2f4f6);
-    const stripe = new THREE.BoxGeometry(19.02, .5, 3.02); stripe.translate(0, 1.5, 0); colorGeo(stripe, 0x1f6fb5);
+    const body = new THREE.BoxGeometry(19, 3.1, 3); body.translate(0, 2.3, 0); colorGeo(body, 0xc4281f);
+    const stripe = new THREE.BoxGeometry(19.02, .5, 3.02); stripe.translate(0, 1.5, 0); colorGeo(stripe, 0xf4f2ea);
     const win = new THREE.BoxGeometry(17.6, .95, 3.04); win.translate(0, 2.9, 0); colorGeo(win, 0x1a2a38);
-    const roofG = new THREE.BoxGeometry(18, .3, 2.5); roofG.translate(0, 3.95, 0); colorGeo(roofG, 0xc4cbd0);
+    const roofG = new THREE.BoxGeometry(18, .3, 2.5); roofG.translate(0, 3.95, 0); colorGeo(roofG, 0xa31f18);
     const bog = new THREE.BoxGeometry(14, .5, 2.4); bog.translate(0, .75, 0); colorGeo(bog, 0x2a2f34);
-    const doors = []; for (let k = -2; k <= 2; k++) { const d = new THREE.BoxGeometry(1.6, 2.1, 3.06); d.translate(k * 3.6, 2.2, 0); colorGeo(d, 0x3c7ca8); doors.push(d); }
+    const doors = []; for (let k = -2; k <= 2; k++) { const d = new THREE.BoxGeometry(1.6, 2.1, 3.06); d.translate(k * 3.6, 2.2, 0); colorGeo(d, 0x8f1c16); doors.push(d); }
     return mergeGeometries([body, stripe, win, roofG, bog, ...doors]);
   })();
   const trainMat = std({ vertexColors: true, roughness: .35, metalness: .45, emissive: 0xffd9a0, emissiveIntensity: 0 });

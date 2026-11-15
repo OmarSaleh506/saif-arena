@@ -7,6 +7,7 @@
     { text: 'من أي بوابة بتطلع؟', opts: ['الجنوبية', 'الغربية', 'الشرقية'], sub: ['المواجهة للمواقف', 'جهة المسرح', 'جهة القاعة A'], cam: ['g0', 'g1', 'g2'] },
   ];
   const BASE = [[70, 52, 26], [12, 20, 31, 61, 24], [92, 34, 22]], titles = ['وصول الزوار', 'وقت المغادرة المتوقع', 'بوابة المغادرة'], GN = ['الجنوبية', 'الغربية', 'الشرقية'];
+  const SC = 14, vis = n => n * SC;
   const clk = m => { const h = Math.floor(m / 60) % 12 || 12, mm = String(Math.floor(m % 60)).padStart(2, '0'); return `${h}:${mm}`; };
 
   RUN.b2 = async api => {
@@ -40,18 +41,18 @@
     /* ---------- التحليل والقرارات ---------- */
     function analyze() {
       phase = 'a'; E.showHero(-1); E.setTaxiStand(-1);
-      const data = BASE.map((arr, k) => arr.map((n, i) => n + (a[k] === i ? 1 : 0))), total = data[0].reduce((x, y) => x + y, 0);
+      const data = BASE.map((arr, k) => arr.map((n, i) => n + (a[k] === i ? 1 : 0))), total = data[0].reduce((x, y) => x + y, 0) * SC;
       yourData = data;
       const peak = data[1].indexOf(Math.max(...data[1])), low = data[2].indexOf(Math.min(...data[2])), topG = data[2].indexOf(Math.max(...data[2]));
-      E.camTo('analysis', 2); E.setTOD(.1); E.heat(data[2], GN);
-      const bars = data.map((arr, k) => { const mx = Math.max(...arr); return `<div class="x3p x3bar" style="position:static;padding:18px 22px;margin-bottom:14px;background:rgba(8,26,25,.9)"><h3 style="font-size:24px;margin:0 0 6px">${titles[k]}</h3>${arr.map((n, i) => `<div class="brow"><span>${Q[k].opts[i]}</span><i class="${a[k] === i ? 'me' : n === mx ? 'hi' : ''}" style="width:${Math.round(n / mx * 100)}%"></i><b>${n}${a[k] === i ? ' ·أنت' : ''}</b></div>`).join('')}</div>`; }).join('');
+      E.camTo('analysis', 2); E.setTOD(.1); E.heat(data[2].map(vis), GN);
+      const bars = data.map((arr, k) => { const mx = Math.max(...arr); return `<div class="x3p x3bar" style="position:static;padding:18px 22px;margin-bottom:14px;background:rgba(8,26,25,.9)"><h3 style="font-size:24px;margin:0 0 6px">${titles[k]}</h3>${arr.map((n, i) => `<div class="brow"><span>${Q[k].opts[i]}</span><i class="${a[k] === i ? 'me' : n === mx ? 'hi' : ''}" style="width:${Math.round(n / mx * 100)}%"></i><b>${vis(n)}${a[k] === i ? ' ·أنت' : ''}</b></div>`).join('')}</div>`; }).join('');
       const draw = () => {
         U.innerHTML = `<div class="dh"><h2>حلّل بيانات <span class="grad">${total} زائرًا</span></h2><div class="pill" style="font-size:24px">بلاغ 02 · قرارات التشغيل</div></div>
           <div class="abs" style="top:290px;right:48px;width:520px">${bars}<div class="muted" style="font-size:20px">الأخضر = إجابتك · الأزرق = الأعلى</div></div>
           <div class="x3p x3d" style="top:290px;left:48px;width:520px"><h3>متى نفتح البوابة الإضافية؟</h3>
             <div class="opts5">${Q[1].opts.map((o, k) => `<button class="opt ${d1 === k ? 'on' : ''}" data-d1="${k}">${o}</button>`).join('')}</div>
             <h3 style="margin-top:26px">وأين نضع محطة التاكسي؟</h3><div class="muted" style="font-size:20px;margin:-6px 0 12px">اختر هنا أو المس البوابة في المجسّم</div>
-            <div class="opts1">${GN.map((o, k) => `<button class="opt ${d2 === k ? 'on' : ''}" data-d2="${k}">بوابة ${o} · ${data[2][k]} زائرًا</button>`).join('')}</div>
+            <div class="opts1">${GN.map((o, k) => `<button class="opt ${d2 === k ? 'on' : ''}" data-d2="${k}">بوابة ${o} · ${vis(data[2][k])} زائرًا</button>`).join('')}</div>
             <button class="btn" id="go" style="width:100%;margin-top:24px" ${d1 !== null && d2 !== null ? '' : 'disabled'}>شغّل المعرض ▶</button></div>`;
         $$('[data-d1]').forEach(b => { const k = +b.dataset.d1; b.onclick = () => { d1 = k; draw(); }; });
         $$('[data-d2]').forEach(b => { const k = +b.dataset.d2; b.onclick = () => { d2 = k; E.setTaxiStand(k); E.camTo('g' + k, 1.2); draw(); }; b.onmouseenter = () => E.camTo('g' + k, 1.2); });
