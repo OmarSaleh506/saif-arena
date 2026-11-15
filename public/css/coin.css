@@ -6,11 +6,8 @@
 .cn .layer,.cn .face,.cn .edge{position:absolute;inset:0;border-radius:50%}
 .cn .layer{background:var(--g3)}
 .cn .edge{background:conic-gradient(from 0deg,var(--g4),var(--g1),var(--g3),var(--g1),var(--g4),var(--g1),var(--g3),var(--g1),var(--g4))}
-.cn .face{display:flex;flex-direction:column;align-items:center;justify-content:center;backface-visibility:hidden;overflow:hidden;
- background:radial-gradient(circle at 32% 26%,var(--g1) 0,var(--g2) 38%,var(--g3) 72%,var(--g4) 100%);
- box-shadow:inset 0 0 0 calc(7px*var(--s)) var(--rim),inset 0 0 0 calc(11px*var(--s)) var(--rim2),inset 0 0 calc(24px*var(--s)) rgba(60,30,0,.45)}
-.cn .face::before{content:"";position:absolute;inset:calc(15px*var(--s));border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(90,50,8,.5) 0 2deg,transparent 2deg 6deg);-webkit-mask:radial-gradient(circle,transparent 70%,#000 71%);mask:radial-gradient(circle,transparent 70%,#000 71%)}
-.cn .face::after{content:"";position:absolute;inset:calc(34px*var(--s));border-radius:50%;border:calc(3px*var(--s)) solid rgba(90,50,8,.5);box-shadow:0 calc(2px*var(--s)) 0 rgba(255,244,190,.7)}
+.cn .face{backface-visibility:hidden;
+}
 .cn .front{transform:translateZ(calc(8px*var(--s)))}.cn .back{transform:rotateY(180deg) translateZ(calc(8px*var(--s)))}
 .cn .logo{width:56%;position:relative;z-index:1;filter:brightness(0) sepia(1) saturate(2.4) hue-rotate(-12deg) brightness(.55) drop-shadow(0 calc(2px*var(--s)) 0 rgba(255,240,170,.85));opacity:.92}
 .cn.t-silver .logo{filter:brightness(0) opacity(.62) drop-shadow(0 calc(2px*var(--s)) 0 rgba(255,255,255,.9))}
@@ -45,3 +42,8 @@
 .cn-qrcard{display:flex;flex-direction:column;align-items:center;gap:.5rem}
 @media (prefers-reduced-motion:reduce){.cn-rain{display:none}.cn-drop .cn-wrap{animation:none}.cn-drop .cn{animation:cnidle 14s linear infinite}}
 .cn .bl.b.l{font-size:calc(16px*var(--s))}
+
+.cn .face svg{display:block;width:100%;height:100%;overflow:visible}
+.cn-stage .rays{position:absolute;width:520px;height:520px;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,236,160,.22) 0 7deg,transparent 7deg 20deg);-webkit-mask:radial-gradient(circle,#000 8%,transparent 66%);mask:radial-gradient(circle,#000 8%,transparent 66%);animation:cnrot 14s linear infinite,cnrin 1.2s ease-out both;animation-delay:0s,.9s;opacity:0}
+@keyframes cnrot{to{transform:rotate(360deg)}}@keyframes cnrin{to{opacity:1}}
+.cn-stage .ring.r2{animation-delay:1.3s;border-color:rgba(255,255,255,.7)}

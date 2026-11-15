@@ -1,4 +1,4 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>عملتي من ساحة سيف</title>
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>كويني من ساحة سيف</title>
 <link rel="stylesheet" href="css/fonts.css"><link rel="stylesheet" href="css/coin.css">
 <style>
 :root{--ink:#081A19;--cream:#F4F2EA}
@@ -11,15 +11,15 @@ button,a.b{font:inherit;font-weight:800;font-size:1.1rem;padding:.9rem 1.7rem;bo
 button.g{background:transparent;border:2px solid rgba(244,242,234,.4)}
 .ok{color:#6FBF9A;min-height:1.4em;font-weight:700}
 </style></head><body>
-<h1>عملتك من ساحة سيف</h1><p class="sub" id="sub"></p>
+<h1>كوينك من ساحة سيف</h1><p class="sub" id="sub"></p>
 <div class="cn-stage" id="st"></div>
-<p class="mute">اسحب العملة لتدويرها، والمسها لتقلبها</p>
+<p class="mute">اسحب الكوين لتدويره، والمسها لتقلبها</p>
 <div class="btns"><button id="sv">حفظ الصورة</button><button class="g" id="sh" hidden>مشاركة</button><a class="b g" href="./">افتح ساحة سيف</a></div><p class="ok" id="ok"></p>
 <script src="js/icons.js"></script><script>const I = n => `<span class="ic">${ICONS[n] || ''}</span>`;</script><script src="js/games-meta.js"></script><script src="js/coin.js"></script>
 <script>
-const q = new URLSearchParams(location.search), g = GAMES.find(x => x.id === q.get('g')) || GAMES[0], tk = ['gold', 'silver', 'bronze'].includes(q.get('t')) ? q.get('t') : 'gold', score = Math.max(0, Math.min(1000, +q.get('s') || 0));
+const q = new URLSearchParams(location.search), g = GAMES.find(x => x.id === q.get('g')) || GAMES[0], tk = ['gold', 'silver', 'bronze'].includes(q.get('t')) ? q.get('t') : 'gold', score = Math.max(0, Math.min(1000, +q.get('s') || 0)), scr = +q.get('c') === 2 ? 2 : 1, ser = Math.max(0, Math.min(9999, +q.get('n') || 0)) || undefined, CO = { scr, score, n: ser };
 document.getElementById('sub').textContent = `${g.badge} · المستوى ${({ gold: 'الذهبي', silver: 'الفضي', bronze: 'البرونزي' })[tk]}${score ? ' · ' + score + ' نقطة' : ''}`;
-const st = document.getElementById('st'); st.innerHTML = coinHTML(g, tk, 'lg', true); const cn = st.querySelector('.cn'), wrap = st.querySelector('.cn-wrap'); wrap.classList.add('drop');
+const st = document.getElementById('st'); st.innerHTML = coinHTML(g, tk, 'lg', true, CO); const cn = st.querySelector('.cn'), wrap = st.querySelector('.cn-wrap'); wrap.classList.add('drop');
 let ang = 0, drag = null, auto = true; cn.classList.add('flip'); setTimeout(() => { cn.classList.remove('flip'); cn.style.animation = 'none'; ang = 0; spin(); }, 2500);
 function spin() { let last = performance.now(); (function f(n) { const d = n - last; last = n; if (auto) ang += d * .06; cn.style.transform = `rotateY(${ang}deg)`; requestAnimationFrame(f); })(last); }
 st.onpointerdown = e => { drag = { x: e.clientX, a: ang, t: performance.now(), m: 0 }; auto = false; st.setPointerCapture(e.pointerId); };
@@ -27,6 +27,6 @@ st.onpointermove = e => { if (!drag) return; drag.m += Math.abs(e.clientX - drag
 st.onpointerup = () => { if (drag && performance.now() - drag.t < 300 && Math.abs(ang - drag.a) < 6) ang = Math.round(ang / 180) * 180 + 180; drag = null; setTimeout(() => { auto = true; }, 1200); };
 coinCelebrate(st, tk);
 const ok = document.getElementById('ok');
-document.getElementById('sv').onclick = async () => { const cv = await coinPng(g, tk, score); cv.toBlob(b => { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'saif-coin.png'; a.click(); ok.textContent = 'تم حفظ الصورة في جوالك'; }, 'image/png'); };
-if (navigator.canShare) { const s = document.getElementById('sh'); s.hidden = false; s.onclick = async () => { const cv = await coinPng(g, tk, score); cv.toBlob(async b => { const f = new File([b], 'saif-coin.png', { type: 'image/png' }); try { if (navigator.canShare({ files: [f] })) await navigator.share({ files: [f], title: 'عملتي من ساحة سيف' }); } catch (e) {} }); }; }
+document.getElementById('sv').onclick = async () => { const cv = await coinPng(g, tk, score, CO); cv.toBlob(b => { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'saif-coin.png'; a.click(); ok.textContent = 'تم حفظ الصورة في جوالك'; }, 'image/png'); };
+if (navigator.canShare) { const s = document.getElementById('sh'); s.hidden = false; s.onclick = async () => { const cv = await coinPng(g, tk, score, CO); cv.toBlob(async b => { const f = new File([b], 'saif-coin.png', { type: 'image/png' }); try { if (navigator.canShare({ files: [f] })) await navigator.share({ files: [f], title: 'كويني من ساحة سيف' }); } catch (e) {} }); }; }
 </script></body></html>

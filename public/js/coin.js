@@ -1,62 +1,73 @@
-/* عملة ساحة سيف: وجهها الشعار، وظهرها التجربة التي خاضها اللاعب */
-const COIN_PAL = { gold: ['#fff3b0', '#f2c94c', '#c8932a', '#7a4e12', '#b57d1c', '#ffe38a', '#6b440e'], silver: ['#ffffff', '#e3e9ec', '#a2aeb3', '#5d686d', '#8d999e', '#f4f8fa', '#3e494e'], bronze: ['#ffdcbc', '#e0995e', '#ab6238', '#5a2f18', '#8e4f2b', '#f3b98d', '#4a2411'] };
+/* كوين ساحة سيف (Challenge Coin): وجهه شعار سيف، وظهره التجربة التي خاضها اللاعب */
+const COIN_PAL = { gold: ['#fff1a8', '#f0c445', '#c28a22', '#6d4510', '#a8741a', '#ffe596', '#4a2d08'], silver: ['#ffffff', '#dfe6ea', '#9aa7ad', '#556167', '#7f8b91', '#f3f7f9', '#323c41'], bronze: ['#ffd7b3', '#dc9158', '#a65d34', '#58301a', '#8a4c2a', '#f0b184', '#3f1f0e'] };
 const COIN_LOGO = typeof LOGO !== 'undefined' ? LOGO : 'img/saif-logo.png';
+const COIN_TIER = { gold: ['الذهبي', 'GOLD', 3], silver: ['الفضي', 'SILVER', 2], bronze: ['البرونزي', 'BRONZE', 1] };
 const coinEsc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-function coinHTML(g, tk, cls = '', wrap = true) {
+const coinSerial = (g, score, n) => String(n || (1000 + (Array.from(g.id + score).reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 9000, 7)))).padStart(4, '0');
+
+/* وجه من وجهي الكوين كـ SVG */
+function coinFace(g, tk, face, o = {}) {
+  const P = COIN_PAL[tk] || COIN_PAL.gold, T = COIN_TIER[tk] || COIN_TIER.gold, u = 'c' + face + Math.random().toString(36).slice(2, 7);
+  const th = o.scr === 2 ? ['#9a4a3b', '#c0644f', '#5a2a21'] : ['#1d6086', '#3a8db5', '#0e3150'];
+  const rim = face === 'f' ? 'SAIF ARENA  •  SECURITY &amp; INNOVATION FAIR  •  2026  •' : `CHALLENGE COIN  •  ${T[1]} LEVEL  •  SAIF ARENA 2026  •`;
+  const stars = Array.from({ length: 3 }, (_, i) => `<path d="M0-6.2 1.9-1.9 6.4-1.6 3-1.1 4.1 3.5 0 1.2-4.1 3.5-3-1.1-6.4-1.6-1.9-1.9Z" transform="translate(${(i - 1) * 15} 0)" fill="${i < T[2] ? P[0] : 'rgba(0,0,0,.35)'}" ${i < T[2] ? `filter="url(#${u}g)"` : ''}/>`).join('');
+  const lvl = g.city ? g.level : 'تحدي', name = g.badge || g.title, fs = name.length > 18 ? 10.5 : name.length > 13 ? 12.5 : 15;
+  const icon = `<svg x="71" y="43" width="58" height="58" viewBox="0 0 24 24" fill="none" stroke="${P[0]}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" filter="url(#${u}g)">${typeof inner === 'function' ? inner(g.icon) : (ICONS[g.icon] || '').replace(/^<svg[^>]*>|<\/svg>$/g, '')}</svg>`;
+  const lg = o.logoData || COIN_LOGO;
+  const content = face === 'f'
+    ? `<image href="${lg}" x="38" y="52" width="124" height="70" preserveAspectRatio="xMidYMid meet" filter="url(#${u}g)"/><g transform="translate(100 146)">${stars}</g>`
+    : `${icon}<text x="100" y="116" text-anchor="middle" font-size="11" font-weight="800" fill="${P[1]}" opacity=".95" filter="url(#${u}s)">${coinEsc(lvl)}</text><text x="100" y="135" text-anchor="middle" font-size="${fs}" font-weight="800" fill="${P[0]}" filter="url(#${u}s)">${coinEsc(name)}</text><text x="100" y="153" text-anchor="middle" font-size="7.5" font-weight="700" letter-spacing="1.5" fill="${P[1]}" font-family="monospace">No. ${coinSerial(g, o.score || 0, o.n)}</text>`;
+  return `<svg class="cf" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"${o.style ? ' style="' + o.style + '"' : ''}>${o.defs || ''}<defs>
+    <linearGradient id="${u}m" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${P[0]}"/><stop offset=".35" stop-color="${P[1]}"/><stop offset=".7" stop-color="${P[2]}"/><stop offset="1" stop-color="${P[3]}"/></linearGradient>
+    <linearGradient id="${u}n" x1="1" y1="1" x2="0" y2="0"><stop offset="0" stop-color="${P[1]}"/><stop offset=".5" stop-color="${P[0]}"/><stop offset="1" stop-color="${P[2]}"/></linearGradient>
+    <radialGradient id="${u}e" cx=".3" cy=".25" r="1"><stop offset="0" stop-color="${th[1]}"/><stop offset=".6" stop-color="${th[0]}"/><stop offset="1" stop-color="${th[2]}"/></radialGradient>
+    <radialGradient id="${u}x" cx=".3" cy=".22" r=".9"><stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <filter id="${u}g" x="-10%" y="-10%" width="120%" height="120%"><feFlood flood-color="${P[0]}" result="f"/><feComposite in="f" in2="SourceAlpha" operator="in" result="c"/><feDropShadow in="c" dx="0" dy="1.3" stdDeviation=".7" flood-color="#000" flood-opacity=".65"/></filter>
+    <filter id="${u}s"><feDropShadow dx="0" dy=".9" stdDeviation=".5" flood-color="#000" flood-opacity=".7"/></filter>
+    <path id="${u}p" d="M100,100 m-81,0 a81,81 0 1,1 162,0 a81,81 0 1,1 -162,0"/></defs>
+    <g font-family="Tajawal,system-ui,sans-serif">
+    <circle cx="100" cy="100" r="99" fill="url(#${u}m)" stroke="${P[4]}" stroke-width="2"/>
+    <circle cx="100" cy="100" r="95.5" fill="none" stroke="${P[3]}" stroke-opacity=".55" stroke-width="4.4" stroke-dasharray="1.5 2.3"/>
+    <circle cx="100" cy="100" r="91" fill="none" stroke="${P[3]}" stroke-width="1.4"/><circle cx="100" cy="100" r="89.8" fill="none" stroke="${P[5]}" stroke-opacity=".8" stroke-width=".8"/>
+    <text font-size="11.5" font-weight="800" letter-spacing="1.1" fill="${P[3]}" stroke="${P[5]}" stroke-width=".25" paint-order="stroke"><textPath href="#${u}p" xlink:href="#${u}p" startOffset="2" textLength="505" lengthAdjust="spacing">${rim}</textPath></text>
+    <circle cx="100" cy="100" r="72.5" fill="url(#${u}n)" stroke="${P[3]}" stroke-width="1.4"/><circle cx="100" cy="100" r="67.5" fill="${P[3]}"/>
+    <circle cx="100" cy="100" r="66" fill="url(#${u}e)"/><circle cx="100" cy="100" r="66" fill="none" stroke="#000" stroke-opacity=".35" stroke-width="2.4"/>
+    ${content}
+    <circle cx="100" cy="100" r="99" fill="url(#${u}x)" pointer-events="none"/></g></svg>`;
+}
+
+function coinHTML(g, tk, cls = '', wrap = true, o = {}) {
   const layers = Array.from({ length: 15 }, (_, i) => `<div class="layer" style="transform:translateZ(calc(${((i - 7) * 1.1).toFixed(1)}px*var(--s)))"></div>`).join('');
-  const lvl = g.city ? g.level : 'تحدي';
   const c = `<div class="cn t-${tk} ${cls}">${layers}<div class="edge"></div>
-    <div class="face front"><img class="logo" src="${COIN_LOGO}" alt="سيف"><div class="shine"></div></div>
-    <div class="face back"><div class="bi">${typeof I === 'function' ? I(g.icon) : ''}</div><div class="bl a">${coinEsc(lvl)}</div><div class="bl b ${(g.badge || g.title).length > 15 ? "l" : ""}">${coinEsc(g.badge || g.title)}</div><div class="shine"></div></div></div>`;
+    <div class="face front">${coinFace(g, tk, 'f', o)}<div class="shine"></div></div>
+    <div class="face back">${coinFace(g, tk, 'b', o)}<div class="shine"></div></div></div>`;
   return wrap ? `<div class="cn-wrap">${c}</div>` : c;
 }
 function coinSound() {
   try {
     const A = window.AudioContext || window.webkitAudioContext; if (!A) return; const ctx = new A(), t = ctx.currentTime;
-    [[1318, 0], [1760, .09], [2093, .2]].forEach(([f, d]) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'triangle'; o.frequency.value = f; g.gain.setValueAtTime(0, t + d); g.gain.linearRampToValueAtTime(.16, t + d + .01); g.gain.exponentialRampToValueAtTime(.0001, t + d + .5); o.connect(g); g.connect(ctx.destination); o.start(t + d); o.stop(t + d + .55); });
-    setTimeout(() => ctx.close(), 1500);
+    [[1568, 0], [2093, .08], [2637, .17]].forEach(([f, d]) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'triangle'; o.frequency.value = f; g.gain.setValueAtTime(0, t + d); g.gain.linearRampToValueAtTime(.15, t + d + .01); g.gain.exponentialRampToValueAtTime(.0001, t + d + .7); o.connect(g); g.connect(ctx.destination); o.start(t + d); o.stop(t + d + .75); });
+    setTimeout(() => ctx.close(), 1600);
   } catch (e) {}
 }
 function coinCelebrate(stage, tk) {
   if (!stage) return; coinSound();
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  stage.insertAdjacentHTML('beforeend', '<i class="ring"></i>' + Array.from({ length: 16 }, (_, i) => `<i class="sp" style="--a:${i * 22.5}deg;--r:${120 + (i % 3) * 38}px;--d:${(1.1 + (i % 4) * .05).toFixed(2)}s"></i>`).join(''));
-  if (reduce) return;
-  const p = COIN_PAL[tk] || COIN_PAL.gold, host = document.createElement('div'); host.className = 'cn-rain';
-  host.style.cssText = `--g1:${p[0]};--g2:${p[1]};--g3:${p[2]};--rim:${p[4]}`;
-  const n = tk === 'gold' ? 34 : tk === 'silver' ? 22 : 12;
-  for (let i = 0; i < n; i++) { const c = document.createElement('i'); const sz = 24 + Math.random() * 20; c.style.cssText = `left:${Math.random() * 100}%;width:${sz}px;height:${sz}px;--t:${(2.2 + Math.random() * 1.6).toFixed(2)}s;--dl:${(0.9 + Math.random() * 1.1).toFixed(2)}s;--dx:${((Math.random() - .5) * 160) | 0}px;--r:${(Math.random() * 540) | 0}deg`; host.appendChild(c); }
-  document.body.appendChild(host); setTimeout(() => host.remove(), 5200);
+  stage.insertAdjacentHTML('afterbegin', '<i class="rays"></i>');
+  stage.insertAdjacentHTML('beforeend', '<i class="ring"></i><i class="ring r2"></i>' + Array.from({ length: 18 }, (_, i) => `<i class="sp" style="--a:${i * 20}deg;--r:${115 + (i % 3) * 40}px;--d:${(1.05 + (i % 4) * .05).toFixed(2)}s"></i>`).join(''));
 }
-/* رسم العملة صورة PNG (وجه وظهر) للتحميل على الجوال */
-async function coinPng(g, tk, score) {
-  const P = COIN_PAL[tk] || COIN_PAL.gold, W = 1600, H = 900, cv = document.createElement('canvas'); cv.width = W; cv.height = H; const x = cv.getContext('2d');
+/* الكوين صورة PNG (وجه وظهر) للتحميل على الجوال */
+async function coinPng(g, tk, score, o = {}) {
+  const P = COIN_PAL[tk] || COIN_PAL.gold, T = COIN_TIER[tk] || COIN_TIER.gold, W = 1600, H = 900, cv = document.createElement('canvas'); cv.width = W; cv.height = H; const x = cv.getContext('2d');
+  const b64 = async (u, mime) => { try { const r = await fetch(u); const bl = await r.blob(); return await new Promise(res => { const f = new FileReader(); f.onload = () => res(f.result); f.readAsDataURL(bl); }); } catch (e) { return ''; } };
+  const [logoData, fAr, fLa] = await Promise.all([b64(COIN_LOGO), b64('fonts/tajawal-arabic-800-normal.woff2'), b64('fonts/tajawal-latin-800-normal.woff2')]);
+  const defs = `<style>@font-face{font-family:Tajawal;font-weight:800;src:url(${fAr}) format('woff2');unicode-range:U+0600-06FF,U+0750-077F,U+FB50-FDFF,U+FE70-FEFF}@font-face{font-family:Tajawal;font-weight:800;src:url(${fLa}) format('woff2');unicode-range:U+0000-00FF,U+2000-206F}</style>`;
   try { await document.fonts.load('800 40px Tajawal'); } catch (e) {}
   const bg = x.createRadialGradient(W / 2, 300, 50, W / 2, H / 2, 900); bg.addColorStop(0, '#14403d'); bg.addColorStop(1, '#081A19'); x.fillStyle = bg; x.fillRect(0, 0, W, H);
-  const img = src => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = src; });
-  const logo = await img(COIN_LOGO);
-  const svgI = await img('data:image/svg+xml;charset=utf-8,' + encodeURIComponent((ICONS[g.icon] || '').replace('<svg', '<svg width="240" height="240"').replace(/currentColor/g, P[6])));
-  const lg = document.createElement('canvas'); lg.width = 400; lg.height = 400; const lx = lg.getContext('2d');
-  if (logo) { const w = 400, h = w * logo.height / logo.width; lx.drawImage(logo, 0, (400 - h) / 2, w, h); lx.globalCompositeOperation = 'source-in'; lx.fillStyle = P[6]; lx.fillRect(0, 0, 400, 400); }
-  const coin = (cx, cy, r, back) => {
-    x.save(); x.shadowColor = 'rgba(0,0,0,.5)'; x.shadowBlur = 40; x.shadowOffsetY = 24; x.beginPath(); x.arc(cx, cy, r, 0, 7); x.fillStyle = P[2]; x.fill(); x.restore();
-    const gr = x.createRadialGradient(cx - r * .35, cy - r * .4, r * .05, cx, cy, r); gr.addColorStop(0, P[0]); gr.addColorStop(.38, P[1]); gr.addColorStop(.72, P[2]); gr.addColorStop(1, P[3]);
-    x.beginPath(); x.arc(cx, cy, r, 0, 7); x.fillStyle = gr; x.fill();
-    x.lineWidth = r * .045; x.strokeStyle = P[4]; x.beginPath(); x.arc(cx, cy, r - r * .03, 0, 7); x.stroke(); x.lineWidth = r * .02; x.strokeStyle = P[5]; x.beginPath(); x.arc(cx, cy, r - r * .08, 0, 7); x.stroke();
-    x.save(); x.strokeStyle = 'rgba(90,50,8,.5)'; x.lineWidth = r * .012; for (let i = 0; i < 120; i++) { const a = i / 120 * 6.2832; x.beginPath(); x.moveTo(cx + Math.cos(a) * (r * .88), cy + Math.sin(a) * (r * .88)); x.lineTo(cx + Math.cos(a) * (r * .94), cy + Math.sin(a) * (r * .94)); x.stroke(); } x.restore();
-    x.lineWidth = r * .02; x.strokeStyle = 'rgba(90,50,8,.5)'; x.beginPath(); x.arc(cx, cy, r * .74, 0, 7); x.stroke();
-    x.textAlign = 'center'; x.fillStyle = P[6];
-    if (!back) { x.drawImage(lg, cx - r * .56, cy - r * .56, r * 1.12, r * 1.12); }
-    else {
-      if (svgI) x.drawImage(svgI, cx - r * .27, cy - r * .5, r * .54, r * .54);
-      x.font = `800 ${r * .1}px Tajawal`; x.globalAlpha = .8; x.fillText(g.city ? g.level : 'تحدي', cx, cy + r * .2); x.globalAlpha = 1;
-      let fs = r * .13; x.font = `800 ${fs}px Tajawal`; while (x.measureText(g.badge).width > r * 1.0 && fs > 14) { fs -= 2; x.font = `800 ${fs}px Tajawal`; } x.fillText(g.badge, cx, cy + r * .4);
-    }
-    const sh = x.createLinearGradient(cx - r, cy - r, cx + r * .2, cy + r * .2); sh.addColorStop(0, 'rgba(255,255,255,.4)'); sh.addColorStop(.5, 'rgba(255,255,255,0)'); x.beginPath(); x.arc(cx, cy, r * .96, 0, 7); x.fillStyle = sh; x.fill();
-  };
-  coin(430, 510, 290, false); coin(1170, 510, 290, true);
-  x.fillStyle = '#F4F2EA'; x.textAlign = 'center'; x.font = '800 58px Tajawal'; x.fillText('عملة ساحة سيف', W / 2, 90);
-  x.font = '700 38px Tajawal'; x.fillStyle = '#E8C77A'; x.fillText(`${g.badge} · المستوى ${({ gold: 'الذهبي', silver: 'الفضي', bronze: 'البرونزي' })[tk]}${score ? ' · ' + score + ' نقطة' : ''}`, W / 2, 140);
+  const draw = (svg, cx, cy, r) => new Promise(res => { const i = new Image(); i.onload = () => { x.save(); x.shadowColor = 'rgba(0,0,0,.55)'; x.shadowBlur = 40; x.shadowOffsetY = 24; x.drawImage(i, cx - r, cy - r, r * 2, r * 2); x.restore(); res(); }; i.onerror = res; i.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg.replace('<svg ', '<svg width="800" height="800" ')); });
+  const oo = Object.assign({}, o, { score, logoData, defs });
+  await draw(coinFace(g, tk, 'f', oo), 430, 510, 290); await draw(coinFace(g, tk, 'b', oo), 1170, 510, 290);
+  x.fillStyle = '#F4F2EA'; x.textAlign = 'center'; x.font = '800 58px Tajawal'; x.fillText('كوين ساحة سيف', W / 2, 90);
+  x.font = '700 38px Tajawal'; x.fillStyle = '#E8C77A'; x.fillText(`${g.badge} · المستوى ${T[0]}${score ? ' · ' + score + ' نقطة' : ''}`, W / 2, 140);
   x.font = '600 30px Tajawal'; x.fillStyle = '#C7D3D1'; x.fillText('SAIF 2026', W / 2, H - 50);
   return cv;
 }
