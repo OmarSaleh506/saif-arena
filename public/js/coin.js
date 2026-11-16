@@ -1,6 +1,6 @@
 /* كوين تجارب طويق التفاعلية (Challenge Coin): وجهه شعار سيف، وظهره جبل طويق */
 const COIN_PAL = { gold: ['#fff1a8', '#f0c445', '#c28a22', '#6d4510', '#a8741a', '#ffe596', '#4a2d08'], silver: ['#ffffff', '#dfe6ea', '#9aa7ad', '#556167', '#7f8b91', '#f3f7f9', '#323c41'], bronze: ['#ffd7b3', '#dc9158', '#a65d34', '#58301a', '#8a4c2a', '#f0b184', '#3f1f0e'] };
-const COIN_LOGO = typeof LOGO !== 'undefined' ? LOGO : 'img/saif-logo.png', COIN_MT = 'img/tuwaiq-mountain.png';
+const COIN_LOGO = 'img/saif-logo-hd.png', COIN_MT = 'img/tuwaiq-mountain-hd.png';
 const COIN_TIER = { gold: ['الذهبي', 'GOLD', 3], silver: ['الفضي', 'SILVER', 2], bronze: ['البرونزي', 'BRONZE', 1] };
 const coinEsc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const coinSerial = (g, score, n) => String(n || (1000 + (Array.from(g.id + score).reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 9000, 7)))).padStart(4, '0');
@@ -21,7 +21,7 @@ function coinFace(g, tk, face, o = {}) {
     <linearGradient id="${u}n" x1="1" y1="1" x2="0" y2="0"><stop offset="0" stop-color="${P[1]}"/><stop offset=".5" stop-color="${P[0]}"/><stop offset="1" stop-color="${P[2]}"/></linearGradient>
     <radialGradient id="${u}e" cx=".3" cy=".25" r="1"><stop offset="0" stop-color="${th[1]}"/><stop offset=".6" stop-color="${th[0]}"/><stop offset="1" stop-color="${th[2]}"/></radialGradient>
     <radialGradient id="${u}x" cx=".3" cy=".22" r=".9"><stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></radialGradient>
-    <filter id="${u}g" x="-10%" y="-10%" width="120%" height="120%"><feFlood flood-color="${P[0]}" result="f"/><feComposite in="f" in2="SourceAlpha" operator="in" result="c"/><feDropShadow in="c" dx="0" dy="1.3" stdDeviation=".7" flood-color="#000" flood-opacity=".65"/></filter>
+    <filter id="${u}g" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB"><feFlood flood-color="${P[0]}" result="f"/><feComposite in="f" in2="SourceAlpha" operator="in" result="c"/><feDropShadow in="c" dx="0" dy="1.3" stdDeviation=".35" flood-color="#000" flood-opacity=".55"/></filter>
     <filter id="${u}s"><feDropShadow dx="0" dy=".9" stdDeviation=".5" flood-color="#000" flood-opacity=".7"/></filter>
     <path id="${u}p" d="M100,100 m-81,0 a81,81 0 1,1 162,0 a81,81 0 1,1 -162,0"/></defs>
     <g font-family="Tajawal,system-ui,sans-serif">
@@ -62,7 +62,7 @@ async function coinPng(g, tk, score, o = {}) {
   const defs = `<style>@font-face{font-family:Tajawal;font-weight:800;src:url(${fAr}) format('woff2');unicode-range:U+0600-06FF,U+0750-077F,U+FB50-FDFF,U+FE70-FEFF}@font-face{font-family:Tajawal;font-weight:800;src:url(${fLa}) format('woff2');unicode-range:U+0000-00FF,U+2000-206F}</style>`;
   try { await document.fonts.load('800 40px Tajawal'); } catch (e) {}
   const bg = x.createRadialGradient(W / 2, 300, 50, W / 2, H / 2, 900); bg.addColorStop(0, '#14403d'); bg.addColorStop(1, '#081A19'); x.fillStyle = bg; x.fillRect(0, 0, W, H);
-  const draw = (svg, cx, cy, r) => new Promise(res => { const i = new Image(); i.onload = () => { x.save(); x.shadowColor = 'rgba(0,0,0,.55)'; x.shadowBlur = 40; x.shadowOffsetY = 24; x.drawImage(i, cx - r, cy - r, r * 2, r * 2); x.restore(); res(); }; i.onerror = res; i.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg.replace('<svg ', '<svg width="800" height="800" ')); });
+  const draw = (svg, cx, cy, r) => new Promise(res => { const i = new Image(); i.onload = () => { x.save(); x.shadowColor = 'rgba(0,0,0,.5)'; x.shadowBlur = 36; x.shadowOffsetY = 22; x.fillStyle = '#000'; x.beginPath(); x.arc(cx, cy, r * .985, 0, 7); x.fill(); x.restore(); x.drawImage(i, cx - r, cy - r, r * 2, r * 2); res(); }; i.onerror = res; i.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg.replace('<svg ', '<svg width="800" height="800" ')); });
   const oo = Object.assign({}, o, { score, logoData, mtData, defs });
   await draw(coinFace(g, tk, 'f', oo), 430, 510, 290); await draw(coinFace(g, tk, 'b', oo), 1170, 510, 290);
   x.fillStyle = '#F4F2EA'; x.textAlign = 'center'; x.font = '800 58px Tajawal'; x.fillText('كوين تجارب طويق التفاعلية', W / 2, 90);
