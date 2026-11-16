@@ -65,7 +65,7 @@ const crowdBlock = () => (SaifStore.config().crowd && !MOBILE) ? `<div class="sa
 function boardPanel(hl) {
   const rows = SaifStore.board({ limit: 10 }), st = SaifStore.stats();
   const g = id => (G(id) || { badge: '' }).badge;
-  const list = rows.length ? rows.map(r => `<li class="sa-row r${r.rank}${hl && r.id === hl ? ' me' : ''}" style="--i:${r.rank}"><span class="sa-rk">${r.rank <= 3 ? medal(r.rank) : r.rank}</span><span class="sa-nm"><b>${esc(r.name)}</b><small>${esc(g(r.game))}</small></span><span class="sa-sc">${r.score}</span></li>`).join('')
+  const list = rows.length ? rows.map(r => `<li class="sa-row r${r.rank}${hl && r.id === hl ? ' me' : ''}" style="--i:${r.rank}"><span class="sa-rk">${r.rank <= 3 ? medal(r.rank) : r.rank}</span><span class="sa-nm"><b>${esc(r.name)}</b><small>${esc(g(r.game))} · ${lvName(r.lv)}</small></span><span class="sa-sc">${r.score}</span></li>`).join('')
     : `<li class="sa-empty"><span>${I('Trophy')}</span><b>الصدارة تنتظر بطلها</b><small>أنهِ أي تجربة وسجّل اسمك لتكون أول المتصدرين اليوم.</small></li>`;
   return `<section class="sa-board" aria-label="لوحة المتصدرين">
     <header><span class="sa-trophy">${I('Trophy')}</span><div><h2>متصدرو اليوم</h2><small>أفضل نتيجة لكل مشارك</small></div><span class="sa-live"><i></i>مباشر</span></header>
@@ -113,11 +113,12 @@ function openIntro(id) {
   el.innerHTML = `<div class="sa-intro-card">
     <button type="button" class="sa-intro-x" id="intro-x" aria-label="إغلاق">${I('X')}</button>
     <div class="sa-intro-art"><div class="sa-pv big" aria-hidden="true">${PV.html(id)}</div>
-      <div class="sa-intro-meta"><span>${I('Timer')} ${fmt(g.time)}</span></div></div>
+      <div class="sa-intro-meta"><span>${I('Timer')} ${fmt(Math.round(g.time * (g.ts ? g.ts[(S.lvOf[id] || 1) - 1] : LV[S.lvOf[id] || 1].ts)))}</span><span class="lvp lv${S.lvOf[id] || 1}">${LV[S.lvOf[id] || 1].n}</span></div></div>
     <div class="sa-intro-body">
       <small class="sa-intro-k">${I('Lightbulb')} شرح سريع قبل أن تبدأ</small>
       <h2 id="intro-t">${esc(g.title)}</h2>
       <p class="sa-intro-goal"><b>الهدف:</b> ${esc(h.goal)}</p>
+      <div class="sa-lvs" aria-label="مستويات الصعوبة">${[1, 2, 3].map(k => `<span class="${k === (S.lvOf[id] || 1) ? 'on ' : ''}lv${k}"><b>${LV[k].n}</b><small>${k === 1 ? 'وقت أطول' : k === 2 ? 'نقاط ×1.5' : 'نقاط ×2'}</small></span>`).join('')}</div><p class="sa-lvnote">تبدأ بالسهل، وكل ما نجحت (فضي فأعلى) تنتقل تلقائيًا لمستوى أصعب.</p>
       <ol class="sa-intro-steps">${h.steps.map((t, k) => `<li><b>${k + 1}</b><span>${esc(t)}</span></li>`).join('')}</ol>
       ${h.tip ? `<p class="sa-intro-tip">${I('Sparkles')}<span>${esc(h.tip)}</span></p>` : ''}
       <div class="sa-intro-acts"><button type="button" class="sa-btn" id="intro-go">${I('Play')} ابدأ التحدي</button><button type="button" class="sa-btn ghost" id="intro-back">رجوع</button></div>
@@ -172,15 +173,15 @@ function renderHome() {
 }
 
 /* ---------- تشغيل تجربة ---------- */
-function start(id) {
+function start(id, lvIn) {
   closeIntro(); stopAll();
-  const g = G(id); S.game = g; S.left = g.time; S.score = 0; S.screen = SCREEN_OF[id] || 1;
+  const g = G(id), lv = Math.min(3, Math.max(1, lvIn || S.lvOf[id] || 1)); S.lvOf[id] = lv; S.lv = lv; S.game = g; S.limit = Math.round(g.time * (g.ts ? g.ts[lv - 1] : LV[lv].ts)); S.left = S.limit; S.score = 0; S.screen = SCREEN_OF[id] || 1;
   document.body.classList.add('playing'); document.body.classList.remove('rot-ok');
   app.hidden = true; viewport.hidden = false; window.scrollTo(0, 0); fit();
-  stage.innerHTML = `<div class="gridbg"></div>${topbar(g.city ? g.level + ' · ' + g.badge : g.title, `<div class="pill" id="tm">${I('Timer')}<b>${fmt(g.time)}</b></div><div class="pill">${I('Star')}<b id="sc">0</b></div><button class="pill" id="home">${I('House')} الرئيسية</button>`)}<div id="gm"></div>`;
+  stage.innerHTML = `<div class="gridbg"></div>${topbar(g.city ? g.level + ' · ' + g.badge : g.title, `<div class="pill lvp lv${lv}">${LV[lv].n}</div><div class="pill" id="tm">${I('Timer')}<b>${fmt(S.limit)}</b></div><div class="pill">${I('Star')}<b id="sc">0</b></div><button class="pill" id="home">${I('House')} الرئيسية</button>`)}<div id="gm"></div>`;
   $('#home').onclick = leave;
   const api = {
-    el: $('#gm'),
+    el: $('#gm'), lv,
     add(n) { S.score = Math.max(0, S.score + n); $('#sc').textContent = S.score; },
     set(n) { S.score = Math.max(0, Math.round(n)); $('#sc').textContent = S.score; },
     end: o => result(o || {}), onTimeout: null,
@@ -197,15 +198,15 @@ function leave() { endCanvas(); view = { name: 'home', screen: SCREEN_OF[S.game 
 /* ---------- النتيجة ---------- */
 function result(o) {
   endCanvas();
-  const g = S.game, max = o.max || 1000, score = Math.min(S.score, max), t = tier(score / max);
-  const roundId = SaifStore.addRound({ game: g.id, screen: SCREEN_OF[g.id] || 1, score, max, tier: t[0] });
-  view = { name: 'result', screen: SCREEN_OF[g.id] || 1, res: { g, o, score, max, t, roundId, saved: null, rank: SaifStore.projectedRank(score) } };
+  const g = S.game, lv = S.lv || 1, rmax = o.max || 1000, ratio = Math.min(1, S.score / rmax), max = Math.round(1000 * LV[lv].mu), score = Math.round(ratio * max), t = tier(ratio);
+  const roundId = SaifStore.addRound({ game: g.id, screen: SCREEN_OF[g.id] || 1, score, max, tier: t[0], lv });
+  view = { name: 'result', screen: SCREEN_OF[g.id] || 1, res: { g, o, score, max, t, lv, ratio, roundId, saved: null, rank: SaifStore.projectedRank(score) } };
   boardHL = null; render(); window.scrollTo(0, 0);
 }
 function renderResult() {
-  const r = view.res, { g, o, score, t } = r, scr = view.screen, closed = SaifStore.stats().closed, pl = KIOSK ? { name: '', phone: '' } : SaifStore.player();
-  const lIcons = ['Lock', 'Eye', 'ShieldAlert', 'Fingerprint'], first = !r.celebrated; r.serial = r.serial || (1000 + Math.floor(Math.random() * 8999));
-  const coinUrl = siteUrl().replace(/[?#].*$/, '').replace(/[^/]*$/, '') + `coin.html?g=${encodeURIComponent(g.id)}&t=${t[0]}&s=${score}&c=${scr}&n=${r.serial}`;
+  const r = view.res, { g, o, score, t, lv, ratio } = r, scr = view.screen, closed = SaifStore.stats().closed, pl = KIOSK ? { name: '', phone: '' } : SaifStore.player();
+  const lIcons = ['Lock', 'Eye', 'ShieldAlert', 'Fingerprint'], first = !r.celebrated, up = ratio >= 0.6 && lv < 3; r.serial = r.serial || (1000 + Math.floor(Math.random() * 8999));
+  const coinUrl = siteUrl().replace(/[?#].*$/, '').replace(/[^/]*$/, '') + `coin.html?g=${encodeURIComponent(g.id)}&t=${t[0]}&s=${score}&c=${scr}&n=${r.serial}&l=${lv}`;
   const form = r.saved ? `<div class="sa-saved">${I('CircleCheck')}<span>تم تسجيلك باسم <b>${esc(r.saved.name)}</b> · المركز <b>#${r.rank}</b> اليوم</span></div>`
     : closed ? `<p class="sa-banner">${I('Lock')} انتهت فعالية اليوم، لا يمكن تسجيل أسماء جديدة في الصدارة.</p>`
     : `<form class="sa-form" id="idf" novalidate>
@@ -216,10 +217,10 @@ function renderResult() {
         <button type="submit" class="sa-btn">${I('Trophy')} سجّل اسمي في الصدارة</button></form>`;
   app.innerHTML = `${header()}<div class="sa-layout"><main class="sa-main"><section class="sa-result">
     <article class="sa-glass sa-score"><p class="sa-rhead">${o.timeout ? 'انتهى الوقت، وحصلت على كوين' : esc(o.head || 'أحسنت! حصلت على كوين')}</p>
-      <div class="cn-stage ${first ? 'cn-drop' : ''}" id="cnst">${coinHTML(g, t[0], 'lg', true, { scr, score, n: r.serial })}</div><h2>${esc(g.badge)}</h2><p class="sa-rlevel" style="color:${t[2]}">المستوى ${t[1]}${o.detail ? ' · ' + esc(o.detail) : ''}</p>
+      <div class="cn-stage ${first ? 'cn-drop' : ''}" id="cnst">${coinHTML(g, t[0], 'lg', true, { scr, score, n: r.serial, lv })}</div><h2>${esc(g.badge)}</h2><p class="sa-lvtag lv${lv}">الصعوبة: ${LV[lv].n}</p><p class="sa-rlevel" style="color:${t[2]}">المستوى ${t[1]}${o.detail ? ' · ' + esc(o.detail) : ''}</p>
       <div class="sa-big"><b class="grad">${score}</b><span>نقطة</span></div><p class="sa-rank">${r.saved ? 'ترتيبك' : 'ترتيبك المتوقع'} <b>#${r.rank}</b> اليوم</p>
       <div id="idwrap">${form}</div>
-      <div class="sa-acts"><button type="button" class="sa-btn" id="ag">${I('RotateCcw')} العب مرة أخرى</button><button type="button" class="sa-btn ghost" id="ot">${I('House')} تحدٍّ آخر</button></div>
+      <div class="sa-acts"><button type="button" class="sa-btn" id="ag">${up ? I('ChevronUp') + ' المستوى التالي: ' + LV[lv + 1].n : I('RotateCcw') + (lv === 3 && ratio >= 0.6 ? ' العب الصعب مرة أخرى' : ' أعد المحاولة')}</button><button type="button" class="sa-btn ghost" id="ot">${I('House')} تحدٍّ آخر</button></div>
       ${KIOSK ? '<p class="sa-muted" id="bk"></p>' : ''}</article>
     <article class="sa-glass sa-learn"><h3>ماذا <span class="grad">تعلّمت؟</span></h3>${g.learn.map((l, i) => `<div class="sa-lii"><span class="k">${I(lIcons[i % 4])}</span><div>${esc(l)}</div></div>`).join('')}</article>
     <article class="sa-glass sa-bag"><h3><span class="coral">${I('Award')}</span> خذ <span class="grad">كوينك</span> معك</h3>
@@ -227,8 +228,8 @@ function renderResult() {
   </section></main><aside class="sa-side" id="side">${boardPanel(boardHL)}</aside></div>${footer()}`;
   bindShell();
   if (first) { r.celebrated = true; coinCelebrate($('#cnst', app), t[0]); if (t[0] !== 'bronze') confetti(t); }
-  const back = () => { view = { name: 'home', screen: scr }; location.hash = 's' + scr; render(); window.scrollTo(0, 0); };
-  $('#ag', app).onclick = () => start(g.id);
+  const back = () => { if (KIOSK) S.lvOf = {}; view = { name: 'home', screen: scr }; location.hash = 's' + scr; render(); window.scrollTo(0, 0); };
+  $('#ag', app).onclick = () => start(g.id, up ? lv + 1 : lv);
   $('#ot', app).onclick = back;
   const f = $('#idf', app);
   if (f) f.onsubmit = e => {

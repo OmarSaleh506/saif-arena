@@ -22,7 +22,9 @@ if (window.visualViewport) window.visualViewport.addEventListener('resize', fit)
 fit();
 const pt = e => { const r = stage.getBoundingClientRect(); return { x: (e.clientX - r.left) / SCALE, y: (e.clientY - r.top) / SCALE }; };
 
-let S = { screen: 0, game: null, left: 0, score: 0 }, tick = null, cleanups = [];
+/* مستويات الصعوبة: ts مضاعف الوقت، mu مضاعف النقاط */
+const LV = [null, { n: 'سهل', en: 'EASY', ts: 1.3, mu: 1 }, { n: 'متوسط', en: 'MEDIUM', ts: 1, mu: 1.5 }, { n: 'صعب', en: 'HARD', ts: 0.8, mu: 2 }], lvName = n => (LV[n] || LV[1]).n;
+let S = { screen: 0, game: null, left: 0, score: 0, lvOf: {}, lv: 1 }, tick = null, cleanups = [];
 const onClean = f => cleanups.push(f);
 function stopAll() { clearInterval(tick); tick = null; cleanups.forEach(f => { try { f(); } catch (e) {} }); cleanups = []; }
 function toast(m) {

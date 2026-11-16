@@ -41,7 +41,7 @@ function applyOp(d, op, admin, now) {
       const max = Math.round(+r.max), score = Math.round(+r.score);
       if (!(max >= 1 && max <= 2000) || !(score >= 0 && score <= max)) return 'bad';
       if (d.rounds.some(x => x.id === r.id)) return 'dup';
-      d.rounds.push({ id: r.id, day: dayOf(now), ts: now, name: '', phone: '', game: r.game, screen: +r.screen, score, max, tier: r.tier, hidden: false });
+      d.rounds.push({ id: r.id, day: dayOf(now), ts: now, name: '', phone: '', game: r.game, screen: +r.screen, score, max, tier: r.tier, lv: [1, 2, 3].includes(+r.lv) ? +r.lv : 1, hidden: false });
       return 'ok';
     }
     case 'ident': {

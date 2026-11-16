@@ -1,6 +1,7 @@
 /* كوين تجارب طويق التفاعلية (Challenge Coin): وجهه شعار سيف، وظهره جبل طويق */
 const COIN_PAL = { gold: ['#fff1a8', '#f0c445', '#c28a22', '#6d4510', '#a8741a', '#ffe596', '#4a2d08'], silver: ['#ffffff', '#dfe6ea', '#9aa7ad', '#556167', '#7f8b91', '#f3f7f9', '#323c41'], bronze: ['#ffd7b3', '#dc9158', '#a65d34', '#58301a', '#8a4c2a', '#f0b184', '#3f1f0e'] };
 const COIN_LOGO = 'img/saif-logo-hd.png', COIN_MT = 'img/tuwaiq-mountain-hd.png';
+const COIN_LV = [null, ['سهل', 'EASY'], ['متوسط', 'MEDIUM'], ['صعب', 'HARD']];
 const COIN_TIER = { gold: ['الذهبي', 'GOLD', 3], silver: ['الفضي', 'SILVER', 2], bronze: ['البرونزي', 'BRONZE', 1] };
 const coinEsc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const coinSerial = (g, score, n) => String(n || (1000 + (Array.from(g.id + score).reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 9000, 7)))).padStart(4, '0');
@@ -15,7 +16,7 @@ function coinFace(g, tk, face, o = {}) {
   const lg = o.logoData || COIN_LOGO;
   const content = face === 'f'
     ? `<image href="${lg}" x="38" y="52" width="124" height="70" preserveAspectRatio="xMidYMid meet" filter="url(#${u}g)"/><g transform="translate(100 146)">${stars}</g>`
-    : `<image href="${mt}" x="40" y="58" width="120" height="61" preserveAspectRatio="xMidYMid meet" filter="url(#${u}g)"/><g transform="translate(100 139)">${stars}</g><text x="100" y="157" text-anchor="middle" font-size="7.5" font-weight="700" letter-spacing="1.5" fill="${P[1]}" font-family="monospace">No. ${coinSerial(g, o.score || 0, o.n)}</text>`;
+    : `<image href="${mt}" x="40" y="58" width="120" height="61" preserveAspectRatio="xMidYMid meet" filter="url(#${u}g)"/><g transform="translate(100 139)">${stars}</g>${o.lv ? `<text x="100" y="48" text-anchor="middle" font-size="7" font-weight="800" letter-spacing="2.2" fill="${P[1]}" font-family="Tajawal,system-ui,sans-serif">${COIN_LV[o.lv] ? COIN_LV[o.lv][1] : ''}</text>` : ''}<text x="100" y="157" text-anchor="middle" font-size="7.5" font-weight="700" letter-spacing="1.5" fill="${P[1]}" font-family="monospace">No. ${coinSerial(g, o.score || 0, o.n)}</text>`;
   return `<svg class="cf" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"${o.style ? ' style="' + o.style + '"' : ''}>${o.defs || ''}<defs>
     <linearGradient id="${u}m" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${P[0]}"/><stop offset=".35" stop-color="${P[1]}"/><stop offset=".7" stop-color="${P[2]}"/><stop offset="1" stop-color="${P[3]}"/></linearGradient>
     <linearGradient id="${u}n" x1="1" y1="1" x2="0" y2="0"><stop offset="0" stop-color="${P[1]}"/><stop offset=".5" stop-color="${P[0]}"/><stop offset="1" stop-color="${P[2]}"/></linearGradient>
@@ -66,7 +67,7 @@ async function coinPng(g, tk, score, o = {}) {
   const oo = Object.assign({}, o, { score, logoData, mtData, defs });
   await draw(coinFace(g, tk, 'f', oo), 430, 510, 290); await draw(coinFace(g, tk, 'b', oo), 1170, 510, 290);
   x.fillStyle = '#F4F2EA'; x.textAlign = 'center'; x.font = '800 58px Tajawal'; x.fillText('كوين تجارب طويق التفاعلية', W / 2, 90);
-  x.font = '700 38px Tajawal'; x.fillStyle = '#E8C77A'; x.fillText(`${g.badge} · المستوى ${T[0]}${score ? ' · ' + score + ' نقطة' : ''}`, W / 2, 140);
+  x.font = '700 38px Tajawal'; x.fillStyle = '#E8C77A'; x.fillText(`${g.badge} · ${o.lv ? 'الصعوبة ' + COIN_LV[o.lv][0] + ' · ' : ''}المستوى ${T[0]}${score ? ' · ' + score + ' نقطة' : ''}`, W / 2, 140);
   x.font = '600 30px Tajawal'; x.fillStyle = '#C7D3D1'; x.fillText('SAIF 2026', W / 2, H - 50);
   return cv;
 }

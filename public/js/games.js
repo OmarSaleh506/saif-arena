@@ -23,6 +23,7 @@ RUN.puzzle = api => {
     { n: 4, name: 'نظام حماية', msg: 'فعّل التحقق الثنائي', svg: m => `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'><rect width='600' height='600' fill='#173B3A'/><g fill='none' stroke='#84B6C6' stroke-width='6'><circle cx='300' cy='270' r='200' opacity='.35'/><circle cx='300' cy='270' r='150' opacity='.6'/></g><rect x='200' y='170' width='200' height='200' rx='26' fill='#B95D4E'/><circle cx='300' cy='245' r='30' fill='#F4F2EA'/><rect x='290' y='262' width='20' height='60' rx='8' fill='#F4F2EA'/><g font-family='monospace' font-size='38' fill='#F4F2EA'><text x='80' y='120'>●●●</text><text x='420' y='120'>482</text></g><text x='300' y='550' font-family='Tajawal,sans-serif' font-size='44' font-weight='800' fill='#F4F2EA' text-anchor='middle'>${m}</text></svg>` },
   ];
   let lv = 0, placed = 0;
+  const SZ = [[2, 3, 3], [3, 3, 4], [3, 4, 4]][api.lv - 1]; ART.forEach((a, i) => { a.n = SZ[i]; });
   const run = () => {
     const a = ART[lv], n = a.n, cell = 600 / n, url = 'data:image/svg+xml;utf8,' + encodeURIComponent(a.svg(a.msg));
     placed = 0;
@@ -48,14 +49,14 @@ RUN.puzzle = api => {
           if (Math.hypot(parseFloat(p.style.left) - tx, parseFloat(p.style.top) - ty) < cell * 0.45) {
             p.style.left = tx + 'px'; p.style.top = ty + 'px'; p.classList.add('lock'); placed++; api.add(Math.round(330 / (n * n)));
             $('#pg').textContent = `${placed} من ${n * n} قطعة في مكانها`; $('#pb').style.width = placed / (n * n) * 100 + '%';
-            if (placed === n * n) { toast('انكشفت الرسالة: «' + a.msg + '»'); setTimeout(() => { lv++; if (lv < ART.length) run(); else { api.add(S.left); api.end({ detail: 'أكملت المستويات الثلاثة' }); } }, 1500); }
+            if (placed === n * n) { toast('انكشفت الرسالة: «' + a.msg + '»'); setTimeout(() => { lv++; if (lv < ART.length) run(); else { api.add(S.left); api.end({ detail: 'أكملت الصور الثلاث' }); } }, 1500); }
           } else p.style.transform = `rotate(${p.dataset.r}deg)`;
         };
         p.addEventListener('pointermove', mv); p.addEventListener('pointerup', up);
       });
     }
   };
-  api.onTimeout = () => api.end({ timeout: true, detail: `أكملت ${lv} من 3 مستويات` });
+  api.onTimeout = () => api.end({ timeout: true, detail: `أكملت ${lv} من 3 صور` });
   run();
 };
 
@@ -64,7 +65,7 @@ RUN.network = api => {
   const N = { S: [1560, 400, 'srv'], A: [1180, 230, 'sus'], B: [1180, 400, 'sus'], C: [1180, 600, 'bad'], D: [760, 230, 'n'], E: [760, 400, 'bad'], F: [760, 600, 'n'], P1: [300, 180, 'dev'], P2: [300, 400, 'dev'], P3: [300, 620, 'dev'] };
   const E = [['P1', 'D'], ['P2', 'D'], ['P2', 'E'], ['P2', 'F'], ['P3', 'F'], ['D', 'A'], ['D', 'B'], ['D', 'E'], ['E', 'B'], ['E', 'F'], ['F', 'B'], ['F', 'C'], ['A', 'S'], ['B', 'S'], ['C', 'S'], ['A', 'B'], ['B', 'C']];
   const adj = (a, b) => E.some(([x, y]) => (x === a && y === b) || (x === b && y === a));
-  let fw = new Set(), fwLeft = 2, path = [], links = {}, drawing = false;
+  let fw = new Set(), fwLeft = [3, 2, 2][api.lv - 1], BADP = [50, 100, 200][api.lv - 1], path = [], links = {}, drawing = false;
   const done = () => Object.keys(links).length;
   const col = k => { const t = N[k][2]; return t === 'bad' ? '#E07A6A' : t === 'sus' ? (fw.has(k) ? '#6FBF9A' : '#E8C77A') : t === 'srv' ? '#C9705F' : '#84B6C6'; };
   const icn = k => { const t = N[k][2]; return t === 'dev' ? 'Laptop' : t === 'srv' ? 'Server' : t === 'bad' ? 'Skull' : t === 'sus' ? (fw.has(k) ? 'BrickWall' : 'ShieldAlert') : 'Network'; };
@@ -96,7 +97,7 @@ RUN.network = api => {
   const step = k => {
     const last = path[path.length - 1]; if (k === last || path.includes(k) || !adj(last, k)) return;
     const t = N[k][2];
-    if (t === 'bad') { api.add(-100); path = []; drawing = false; toast('عقدة مصابة! −100 وبدأ المسار من جديد'); return draw(); }
+    if (t === 'bad') { api.add(-BADP); path = []; drawing = false; toast('عقدة مصابة! −' + BADP + ' وبدأ المسار من جديد'); return draw(); }
     if (t === 'sus' && !fw.has(k)) { drawing = false; path = []; toast('عقدة مشبوهة: المسها لوضع جدار حماية أولًا'); return draw(); }
     path.push(k);
     if (t === 'srv') { links[path[0]] = path.slice(); path = []; drawing = false; api.add(280);
@@ -125,7 +126,7 @@ RUN.vuln = api => {
       if (hv) { const k = hv.dataset.v; if (found.has(k)) return; found.add(k); api.add(150); toast('✓ ' + V.find(v => v[0] === k)[1]);
         if (found.size === 5) { api.add(S.left * 2); draw(); return setTimeout(() => api.end({ detail: 'اكتشفت الثغرات الخمس' }), 700); } return draw(); }
       const p = pt(e), r = document.createElement('div'); r.className = 'ripple'; r.style.left = p.x + 'px'; r.style.top = p.y + 'px'; stage.appendChild(r); setTimeout(() => r.remove(), 500);
-      S.left = Math.max(1, S.left - 5); toast('لا توجد ثغرة هنا · −5 ثوانٍ');
+      const pn = [3, 5, 8][api.lv - 1]; S.left = Math.max(1, S.left - pn); toast('لا توجد ثغرة هنا · −' + pn + ' ثوانٍ');
     });
   };
   api.onTimeout = () => api.end({ timeout: true, detail: `اكتشفت ${found.size} من 5` });
@@ -137,6 +138,7 @@ RUN.defend = api => {
   const TH = [['تصيّد', 'Mail', 'filter'], ['برمجية خبيثة', 'Skull', 'av'], ['تخمين كلمات المرور', 'KeyRound', 'mfa'], ['فدية', 'Lock', 'backup'], ['حجب الخدمة', 'Zap', 'ddos']];
   const TOOLS = [['filter', 'فلترة البريد', 'Filter'], ['av', 'مضاد فيروسات', 'Shield'], ['mfa', 'تحقق ثنائي', 'Fingerprint'], ['ddos', 'حماية حجب الخدمة', 'Activity'], ['backup', 'نسخ احتياطي', 'DatabaseBackup']];
   let health = 100, combo = 0, threats = [], sel = null, tool = null, raf, last = performance.now(), spawnIn = 400;
+  const DL = api.lv - 1, SPM = [.8, 1, 1.25][DL], SPW = [3200, 2600, 2000][DL], SPMIN = [1400, 1100, 800][DL], MAXT = [4, 6, 8][DL], DMG = [10, 15, 20][DL];
   let mult = 1; try { mult = Math.min(3, Math.max(1, +localStorage.getItem('saif-defend-speed') || 1)); } catch (e) {}
   api.el.innerHTML = `<svg class="abs" style="inset:0" width="1920" height="1080" id="ln"></svg><div class="srv">${I('Server')}<b>الخادم الرئيسي</b></div>
     <div class="health">سلامة النظام <span id="hv">100</span>%<div class="bar" style="margin-top:10px;height:16px"><i id="hb" style="width:100%"></i></div></div>
@@ -156,7 +158,7 @@ RUN.defend = api => {
   $$('.tool').forEach(b => b.onclick = () => { tool = b.dataset.t; $$('.tool').forEach(t => t.classList.toggle('on', t === b)); if (sel) resolve(); });
   const spawn = () => {
     const [n, ic, fix] = TH[Math.floor(Math.random() * TH.length)], a = Math.random() * Math.PI * 2;
-    const th = { fix, x: 960 + Math.cos(a) * 820, y: 540 + Math.sin(a) * 420, sp: 0.045 + Math.random() * 0.02 + (60 - S.left) * 0.0008 };
+    const th = { fix, x: 960 + Math.cos(a) * 820, y: 540 + Math.sin(a) * 420, sp: (0.045 + Math.random() * 0.02 + (60 - S.left) * 0.0008) * SPM };
     th.y = Math.max(250, Math.min(830, th.y)); th.x = Math.max(120, Math.min(1800, th.x));
     const el = document.createElement('button'); el.className = 'th'; el.innerHTML = I(ic) + `<span>${n}</span>`; el.setAttribute('aria-label', n);
     el.onclick = () => { $$('.th').forEach(t => t.classList.remove('sel')); sel = th; el.classList.add('sel'); if (tool) resolve(); };
@@ -164,11 +166,11 @@ RUN.defend = api => {
   };
   const loop = now => {
     const dt = Math.min(50, now - last); last = now; spawnIn -= dt * mult;
-    if (spawnIn <= 0 && threats.length < 6) { spawn(); spawnIn = Math.max(1100, 2600 - (60 - S.left) * 25); }
+    if (spawnIn <= 0 && threats.length < MAXT) { spawn(); spawnIn = Math.max(SPMIN, SPW - (60 - S.left) * 25); }
     let lines = '';
     for (const t of threats.slice()) {
       const dx = 960 - t.x, dy = 540 - t.y, d = Math.hypot(dx, dy);
-      if (d < 160) { health -= 15; combo = 0; t.el.remove(); threats = threats.filter(x => x !== t); if (sel === t) sel = null; $('#hv').textContent = Math.max(0, health); $('#hb').style.width = Math.max(0, health) + '%'; $('#hb').style.background = health < 40 ? 'var(--bad)' : 'var(--ok)'; shake($('.srv'));
+      if (d < 160) { health -= DMG; combo = 0; t.el.remove(); threats = threats.filter(x => x !== t); if (sel === t) sel = null; $('#hv').textContent = Math.max(0, health); $('#hb').style.width = Math.max(0, health) + '%'; $('#hb').style.background = health < 40 ? 'var(--bad)' : 'var(--ok)'; shake($('.srv'));
         if (health <= 0) { cancelAnimationFrame(raf); return api.end({ head: 'سقط الخادم! وهذه شارتك', detail: 'اعترض التهديدات أسرع', max: 1500 }); } continue; }
       t.x += dx / d * t.sp * dt * mult; t.y += dy / d * t.sp * dt * mult; t.el.style.left = t.x + 'px'; t.el.style.top = t.y + 'px';
       lines += `<line x1="${t.x}" y1="${t.y}" x2="960" y2="540" stroke="#E07A6A" stroke-width="3" stroke-dasharray="10 12" opacity=".6"/>`;
@@ -188,11 +190,11 @@ RUN.forensic = api => {
   const place = (i, s) => {
     if (placed[s] !== undefined) return;
     if (i === s) { placed[s] = i; pool = pool.filter(x => x !== i); api.add(150); selI = null; if (placed.filter(x => x !== undefined).length === 4) phase = 2; draw(); }
-    else { api.add(-40); selI = null; draw(); shake($(`[data-e="${i}"]`)); toast('ليس هذا مكانه. ما الذي حدث قبله؟'); }
+    else { api.add(-[20, 40, 80][api.lv - 1]); selI = null; draw(); shake($(`[data-e="${i}"]`)); toast('ليس هذا مكانه. ما الذي حدث قبله؟'); }
   };
   const draw = () => {
     if (phase === 2) {
-      const Q = [['تصيّد عبر البريد الإلكتروني', true], ['كلمة مرور ضعيفة', false], ['جهاز USB مصاب', false]];
+      const Q = [['تصيّد عبر البريد الإلكتروني', true], ['كلمة مرور ضعيفة', false], ['جهاز USB مصاب', false], ['ثغرة في موقع الشركة', false]].filter((q, k) => api.lv === 3 || k < (api.lv === 1 ? 2 : 3)); Q.sort(() => Math.random() - .5);
       api.el.innerHTML = `<div class="fh">كيف بدأت الحادثة؟<small>اختر السبب بعد أن رتّبت الأدلة</small></div><div class="axis"></div>
         <div class="tl">${EV.map((_, s) => `<div class="slot"><span class="n">${s + 1}</span>${card(s, true)}</div>`).join('')}</div>
         <div class="pool" style="justify-content:center">${Q.map((q, k) => `<button class="btn ghost" data-q="${k}" style="font-size:28px">${q[0]}</button>`).join('')}</div>`;
@@ -272,7 +274,7 @@ RUN.deepfake = api => {
     }); });
     $$('[data-a]').forEach(b => b.onclick = () => {
       const k = +b.dataset.k; if (ans[k] !== null) return; const it = R[r][k], ok = it.k === 'aud' ? +b.dataset.a === it.real : (b.dataset.a === '1') === it.fake; ans[k] = ok;
-      b.classList.add(ok ? 'right' : 'wrong'); if (ok) { right++; api.add(70 + Math.min(10, S.left)); }
+      b.classList.add(ok ? 'right' : 'wrong'); if (ok) { right++; api.add(70 + Math.min(10, S.left)); } else api.add(-[0, 20, 40][api.lv - 1]);
       const m = $('#m' + k); m.classList.add('done');
       const v = document.createElement('div'); v.className = 'verdict'; v.style.background = it.k === 'aud' ? 'var(--terr)' : it.fake ? 'var(--bad)' : 'var(--ok)'; v.textContent = (it.k === 'aud' ? 'الحقيقي: المقطع ' + ['أ', 'ب'][it.real] : it.fake ? 'مزيّف' : 'حقيقي') + (ok ? ' ✓ إجابة صحيحة' : ' · إجابتك خاطئة'); m.querySelector('.media').appendChild(v);
       if (it.k === 'aud') $('#tr' + k).textContent = '«' + it.txt + '»';
@@ -316,7 +318,7 @@ RUN.ml = api => {
       TEST.forEach(t => { const s = t[1].reduce((a, x) => a + (w[x] || 0), 0); t.p = s > 0 ? 1 : 0; t.ok = t.p === t[2]; });
       acc = Math.round(100 * TEST.filter(t => t.ok).length / TEST.length); best = Math.max(best, acc);
       errs = TRAIN.map((m, i) => lab[i] !== m[4] ? i : -1).filter(i => i >= 0);
-      api.set(best * 10 - (rounds - 1) * 40); draw();
+      api.set(best * 10 - (rounds - 1) * [20, 40, 70][api.lv - 1]); draw();
     };
     if ($('#fin')) $('#fin').onclick = () => api.end({ detail: `دقة الحارس ${best}%` });
   };
@@ -353,13 +355,13 @@ RUN.pattern = api => {
        <text x="40" y="${Y(d.ym / 2)}" fill="#F4F2EA" font-size="26" font-weight="700" text-anchor="middle" transform="rotate(-90 40 ${Y(d.ym / 2)})">${d.yl}</text>
        <rect x="${X(d.band[0])}" y="${Y(d.band[3])}" width="${X(d.band[1]) - X(d.band[0])}" height="${Y(d.band[2]) - Y(d.band[3])}" rx="30" fill="rgba(132,182,198,.07)" stroke="rgba(132,182,198,.45)" stroke-dasharray="10 8"/>
        <text x="${(X(d.band[0]) + X(d.band[1])) / 2}" y="${Y(d.band[3]) - 14}" fill="#84B6C6" font-size="24" font-weight="700" text-anchor="middle">${d.band[4]}</text>
-       ${all.map(([p, k]) => `<circle class="pt" data-k="${k}" cx="${X(p[0])}" cy="${Y(p[1])}" r="${k === 'n' ? 13 : 15}" fill="#84B6C6" fill-opacity=".85"/>`).join('')}
+       ${all.map(([p, k]) => `<circle class="pt" data-k="${k}" cx="${X(p[0])}" cy="${Y(p[1])}" r="${k === 'n' ? [17, 13, 9][api.lv - 1] : [19, 15, 11][api.lv - 1]}" fill="#84B6C6" fill-opacity=".85"/>`).join('')}
       </svg>
       <div class="lg2"><span><i style="background:#84B6C6"></i>جلسة طبيعية</span><span><i style="background:#E07A6A"></i>نشاط شاذ</span><span><i style="border:3px solid #C9705F"></i>اختيارك</span><span><i style="border:3px dashed #84B6C6"></i>اختيار النموذج</span></div>
       <div class="card side" id="pn" style="top:290px;left:64px;width:520px;height:720px;padding:36px"><h2 style="font-size:34px">المس النقطة المختلفة</h2><p style="font-size:24px">الذكاء الاصطناعي يحلل نفس البيانات معك. من سيجدها أولًا؟</p></div>`;
     $$('#ps .pt').forEach(c => c.onclick = () => {
       if (answered) return; answered = true; const secs = (Date.now() - t0) / 1000, ok = c.dataset.k === 'odd';
-      if (ok) { right++; api.add(250 + Math.max(0, Math.round(80 - secs * 6))); }
+      if (ok) { right++; api.add(250 + Math.max(0, Math.round(80 - secs * [3, 6, 10][api.lv - 1]))); } else if (api.lv === 3) api.add(-60);
       const sv = $('#ps'), ns = 'http://www.w3.org/2000/svg', ring = (el, r, st, dash) => { const e = document.createElementNS(ns, 'circle'); e.setAttribute('cx', el.getAttribute('cx')); e.setAttribute('cy', el.getAttribute('cy')); e.setAttribute('r', r); e.setAttribute('fill', 'none'); e.setAttribute('stroke', st); e.setAttribute('stroke-width', dash ? 3 : 5); if (dash) e.setAttribute('stroke-dasharray', '8 8'); sv.appendChild(e); };
       const odd = $('#ps [data-k="odd"]'); odd.setAttribute('fill', '#E07A6A'); odd.setAttribute('fill-opacity', 1); odd.setAttribute('r', 16);
       ring(c, 44, '#C9705F'); ring($(`#ps [data-k="${d.model}"]`), 66, '#84B6C6', true);
@@ -397,7 +399,7 @@ RUN.b1 = api => {
         <div class="opts1">${labels.map((l, k) => ch3(k, on.includes(k), l)).join('')}</div>
         <button class="btn" id="cf" style="width:100%;margin-top:26px" ${unique ? '' : 'disabled'}>${unique ? 'مرشح واحد! أكّد وأرسل الموقع' : on.length ? `ما زال هناك ${count} مرشحين` : 'اختر الأدلة'}</button></div>`;
     $$('[data-o]').forEach(b => b.onclick = () => { const k = +b.dataset.o; on = on.includes(k) ? on.filter(x => x !== k) : on.concat(k); draw(); });
-    $('#cf').onclick = () => { if (!unique) return; api.set(on.length === 2 ? 900 + Math.min(100, S.left) : 650); api.end({ detail: on.length === 2 ? 'حدّدته بدليلين فقط ★★★' : 'نجحت ★★ ويمكن بدليلين فقط' }); };
+    $('#cf').onclick = () => { if (!unique) return; api.set(on.length === 2 ? 900 + Math.min(100, S.left) : [800, 650, 450][api.lv - 1]); api.end({ detail: on.length === 2 ? 'حدّدته بدليلين فقط ★★★' : 'نجحت ★★ ويمكن بدليلين فقط' }); };
   };
   api.onTimeout = () => api.end({ timeout: true });
   draw();
@@ -440,7 +442,7 @@ RUN.b2_flat = api => {
 };
 
 RUN.b3 = api => {
-  const SRT = 30, GOAL = 5, CAP = 11, block = [8, 9, 14, 20, 21, 27], wind = [12, 18, 33, 34, 3];
+  const SRT = 30, GOAL = 5, CAP = [14, 11, 11][api.lv - 1], block = [8, 9, 14, 20, 21, 27], wind = [12, 18, 33, 34, 3];
   const cost = i => wind.includes(i) ? 2 : 1, adj = (a, b) => Math.abs(a - b) === 6 || (Math.abs(a - b) === 1 && Math.floor(a / 6) === Math.floor(b / 6));
   let path = [SRT], over = false, prevPos = null;
   const cellXY = i => ({ x: 960 + (5 - (i % 6)) * 121.667 + 55.8, y: 290 + Math.floor(i / 6) * 121.667 + 55.8 });
@@ -459,7 +461,7 @@ RUN.b3 = api => {
     api.el.innerHTML = `<div class="dh"><h2>أوصل الدرون <span class="grad">قبل نفاد البطارية</span></h2><div class="pill" style="font-size:24px">بلاغ 03 · الدرونز</div></div>
       <div class="dgrid">${cells}</div>
       <div class="card side" style="top:290px;left:64px;width:560px;height:720px">
-        <div style="display:flex;justify-content:space-between;font-size:26px"><span>${I('BatteryMedium')} البطارية</span><b>${Math.max(0, bat)} / 11 وحدة</b></div>
+        <div style="display:flex;justify-content:space-between;font-size:26px"><span>${I('BatteryMedium')} البطارية</span><b>${Math.max(0, bat)} / ${CAP} وحدة</b></div>
         <div class="units">${Array.from({ length: CAP }, (_, k) => `<i class="${k < bat ? (bat <= 3 ? 'lo' : 'on') : ''}"></i>`).join('')}</div>
         <div class="fi ${won ? '' : dead ? 'bad' : 'empty'}" style="margin-top:0"><span>${I(won ? 'CircleCheck' : dead ? 'CircleX' : 'Hand')}</span><div><b>${won ? 'وصل الدرون!' : dead ? 'نفدت البطارية' : 'المس خانة مجاورة'}</b>${won ? `متبقي ${bat} وحدات` : dead ? 'تراجع وجرّب طريقًا آخر' : 'الخانات المتاحة محددة بخط متقطع'}</div></div>
         <div class="leg"><span><i style="background:#1E3A5F">≋</i> رياح: وحدتان</span><span><i style="background:#2A3340"></i> منطقة محظورة</span><span><i style="background:var(--line2)"></i> خانة عادية: وحدة</span></div>
@@ -467,7 +469,7 @@ RUN.b3 = api => {
     const to = cellXY(last), from = prevPos || to; api.el.insertAdjacentHTML('beforeend', `<div class="drone" id="dr" style="left:${from.x}px;top:${from.y}px">${DRONE}</div>`);
     const dr = $('#dr'); requestAnimationFrame(() => requestAnimationFrame(() => { if (!dr.isConnected) return; dr.style.left = to.x + 'px'; dr.style.top = to.y + 'px'; dr.style.transform = `translate(-50%,-50%) rotate(${Math.max(-18, Math.min(18, (to.x - from.x) / 6))}deg)`; setTimeout(() => { dr.style.transform = 'translate(-50%,-50%)'; }, 420); })); prevPos = to;
     $$('[data-c]').forEach(b => b.onclick = () => { const i = +b.dataset.c; if (!won && !dead && !block.includes(i) && !path.includes(i) && adj(last, i)) { path.push(i); draw(); } });
-    $('#un').onclick = () => { if (path.length > 1 && !over) { path.pop(); draw(); } };
+    $('#un').onclick = () => { if (api.lv === 3) return toast('التراجع غير متاح في المستوى الصعب'); if (path.length > 1 && !over) { path.pop(); draw(); } };
     $('#rs').onclick = () => { if (!over) { path = [SRT]; draw(); } };
     if (won && !over) { over = true; api.set(500 + bat * 110 + Math.min(60, S.left)); setTimeout(() => api.end({ detail: `وصل الدرون ومتبقي ${bat} وحدات` }), 1000); }
   };
@@ -497,7 +499,7 @@ RUN.b4 = api => {
           <button class="btn" id="ts" style="width:100%;margin-top:40px">جمّع واختبر في الميدان</button>`}</div>`;
     $$('[data-g]').forEach(b => b.onclick = () => { p[+b.dataset.g] = +b.dataset.o; draw(); });
     if ($('#ts')) $('#ts').onclick = () => { tested = true; draw(); };
-    if ($('#ed')) $('#ed').onclick = () => { if (passed === 5) { api.set(Math.max(500, 1150 - attempt * 150)); api.end({ detail: `نجح الروبوت في ${attempt === 1 ? 'أول محاولة' : attempt + ' محاولات'}` }); } else { tested = false; attempt++; draw(); } };
+    if ($('#ed')) $('#ed').onclick = () => { if (passed === 5) { api.set(Math.max(500, 1150 - attempt * [100, 150, 250][api.lv - 1])); api.end({ detail: `نجح الروبوت في ${attempt === 1 ? 'أول محاولة' : attempt + ' محاولات'}` }); } else { tested = false; attempt++; draw(); } };
   };
   api.onTimeout = () => api.end({ timeout: true });
   draw();
@@ -520,7 +522,7 @@ RUN.b5 = api => {
         <p>3 سجلات فقط تهديدات حقيقية، وبعضها يبدو مريبًا وهو سليم. المس المشتبه بها ثم تحقق.</p>
         <button class="btn" id="ck" style="width:100%;margin-top:30px">${won ? 'النتيجة' : checked ? 'عدّل وحاول مرة أخرى' : `تحقق (${on.length} محدد)`}</button></div>`;
     $$('[data-l]').forEach(b => b.onclick = () => { const i = +b.dataset.l; checked = false; on = on.includes(i) ? on.filter(x => x !== i) : on.concat(i); draw(); });
-    $('#ck').onclick = () => { if (won) { api.set(Math.max(400, 1100 - tries * 150 + Math.min(50, S.left))); return api.end({ detail: tries === 1 ? 'كشفت المتسلل من أول تحقق' : `كشفته في ${tries} محاولات` }); } if (checked) { checked = false; return draw(); } tries++; checked = true; draw(); };
+    $('#ck').onclick = () => { if (won) { api.set(Math.max(400, 1100 - tries * [100, 150, 250][api.lv - 1] + Math.min(50, S.left))); return api.end({ detail: tries === 1 ? 'كشفت المتسلل من أول تحقق' : `كشفته في ${tries} محاولات` }); } if (checked) { checked = false; return draw(); } tries++; checked = true; draw(); };
   };
   api.onTimeout = () => api.end({ timeout: true });
   draw();

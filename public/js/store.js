@@ -93,9 +93,9 @@ const SaifStore = (() => {
   /** تُسجَّل كل جولة منتهية دون اسم، ثم يُضاف الاسم والجوال عند الحفظ. */
   function addRound(o) {
     const all = rounds();
-    const r = { id: newId(), day: today(), ts: Date.now(), name: '', phone: '', game: o.game, screen: o.screen, score: o.score, max: o.max, tier: o.tier, hidden: false };
+    const r = { id: newId(), day: today(), ts: Date.now(), name: '', phone: '', game: o.game, screen: o.screen, score: o.score, max: o.max, tier: o.tier, lv: o.lv || 1, hidden: false };
     all.push(r); saveRounds(all);
-    push({ t: 'add', round: { id: r.id, game: r.game, screen: r.screen, score: r.score, max: r.max, tier: r.tier } });
+    push({ t: 'add', round: { id: r.id, game: r.game, screen: r.screen, score: r.score, max: r.max, tier: r.tier, lv: r.lv } });
     return r.id;
   }
   function saveIdentity(id, name, phone) {
@@ -122,7 +122,7 @@ const SaifStore = (() => {
   /** لوحة المتصدرين: أفضل جولة لكل مشارك اليوم، مع تصفية بالشاشة. */
   function board({ screen = 0, limit = 10, day = today() } = {}) {
     const rows = rounds().filter(r => isNamed(r) && (day === 'all' || r.day === day) && (!screen || r.screen === screen));
-    return bestPerName(rows).slice(0, limit).map((r, i) => ({ rank: i + 1, id: r.id, name: r.name, score: r.score, max: r.max, game: r.game, screen: r.screen, tier: r.tier }));
+    return bestPerName(rows).slice(0, limit).map((r, i) => ({ rank: i + 1, id: r.id, name: r.name, score: r.score, max: r.max, game: r.game, screen: r.screen, tier: r.tier, lv: r.lv || 1 }));
   }
   function stats(day = today()) {
     const all = rounds().filter(r => !r.hidden), t = all.filter(r => r.day === day);
