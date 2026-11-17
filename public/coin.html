@@ -14,7 +14,7 @@ button.g{background:transparent;border:2px solid rgba(244,242,234,.4)}
 <h1>كوينك من تجارب طويق التفاعلية</h1><p class="sub" id="sub"></p>
 <div class="cn-stage" id="st"></div>
 <p class="mute">اسحب الكوين لتدويره، والمسها لتقلبها</p>
-<div class="btns"><button id="sv">حفظ الصورة</button><button class="g" id="sh" hidden>مشاركة</button><a class="b g" href="./">افتح تجارب طويق التفاعلية</a></div><p class="ok" id="ok"></p>
+<div class="btns"><button id="sv">حفظ الصورة</button><button class="g" id="sh" hidden>مشاركة</button><a class="b" id="kp" href="pack/knowledge-pack.pdf" download="الحقيبة-المعرفية-GSTS.pdf" style="flex-basis:100%;text-align:center">حمّل الحقيبة المعرفية (PDF)</a><a class="b g" href="./">افتح تجارب طويق التفاعلية</a></div><p class="ok" id="ok"></p>
 <script src="js/icons.js"></script><script>const I = n => `<span class="ic">${ICONS[n] || ''}</span>`;</script><script src="js/games-meta.js"></script><script src="js/coin.js"></script>
 <script>
 const q = new URLSearchParams(location.search), g = GAMES.find(x => x.id === q.get('g')) || GAMES[0], tk = ['gold', 'silver', 'bronze'].includes(q.get('t')) ? q.get('t') : 'gold', score = Math.max(0, Math.min(2000, +q.get('s') || 0)), lvl = [1, 2, 3].includes(+q.get('l')) ? +q.get('l') : 0, scr = +q.get('c') === 2 ? 2 : 1, ser = Math.max(0, Math.min(9999, +q.get('n') || 0)) || undefined, CO = { scr, score, n: ser, lv: lvl };

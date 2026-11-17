@@ -224,7 +224,7 @@ function renderResult() {
       ${KIOSK ? '<p class="sa-muted" id="bk"></p>' : ''}</article>
     <article class="sa-glass sa-learn"><h3>ماذا <span class="grad">تعلّمت؟</span></h3>${g.learn.map((l, i) => `<div class="sa-lii"><span class="k">${I(lIcons[i % 4])}</span><div>${esc(l)}</div></div>`).join('')}</article>
     <article class="sa-glass sa-bag"><h3><span class="coral">${I('Award')}</span> خذ <span class="grad">كوينك</span> معك</h3>
-      <div class="sa-qr">${qrSvg(coinUrl)}</div><p class="sa-cap">امسح الرمز بجوالك لتحمّل كوين «${esc(g.badge)}» كصورة</p></article>
+      <div class="sa-qr">${qrSvg(coinUrl)}</div><p class="sa-cap">امسح الرمز بجوالك لتحمّل كوين «${esc(g.badge)}» كصورة، ومعه الحقيبة المعرفية لشهر الأمن والتقنية</p></article>
   </section></main><aside class="sa-side" id="side">${boardPanel(boardHL)}</aside></div>${footer()}`;
   bindShell();
   if (first) { r.celebrated = true; coinCelebrate($('#cnst', app), t[0]); if (t[0] !== 'bronze') confetti(t); }
