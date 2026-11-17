@@ -7,10 +7,20 @@ const coinEsc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': 
 const coinSerial = (g, score, n) => String(n || (1000 + (Array.from(g.id + score).reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 9000, 7)))).padStart(4, '0');
 
 /* وجه من وجهي الكوين كـ SVG */
+/* نص الإطار: كل حرف يُوضع بزاوية خاصة (بدل textPath) ليظهر كاملًا في كل المتصفحات */
+function coinRim(str, P) {
+  const W = c => c === ' ' ? .55 : c === '•' ? .6 : /[IJ1]/.test(c) ? .45 : /[WM&]/.test(c) ? 1.05 : .8, ch = [...str], tot = ch.reduce((a, c) => a + W(c), 0);
+  let acc = 0;
+  return `<g font-size="11.5" font-weight="800" fill="${P[3]}" stroke="${P[5]}" stroke-width=".25" paint-order="stroke" text-anchor="middle">` + ch.map(c => {
+    const a = -90 + (acc + W(c) / 2) / tot * 360; acc += W(c);
+    return c === ' ' ? '' : `<text x="100" y="19" transform="rotate(${a.toFixed(2)} 100 100)">${c === '&' ? '&amp;' : c}</text>`;
+  }).join('') + '</g>';
+}
+
 function coinFace(g, tk, face, o = {}) {
   const P = COIN_PAL[tk] || COIN_PAL.gold, T = COIN_TIER[tk] || COIN_TIER.gold, u = 'c' + face + Math.random().toString(36).slice(2, 7);
   const th = o.scr === 2 ? ['#9a4a3b', '#c0644f', '#5a2a21'] : ['#1d6086', '#3a8db5', '#0e3150'];
-  const rim = face === 'f' ? 'SAIF  •  SECURITY &amp; INNOVATION FAIR  •  2026  •  TUWAIQ ACADEMY  •' : `TUWAIQ INTERACTIVE EXPERIENCES  •  ${T[1]} LEVEL  •  2026  •`;
+  const rim = face === 'f' ? 'SAIF  •  SECURITY & INNOVATION FAIR  •  2026  •  TUWAIQ ACADEMY  •' : `TUWAIQ INTERACTIVE EXPERIENCES  •  ${T[1]} LEVEL  •  2026  •`;
   const stars = Array.from({ length: 3 }, (_, i) => `<path d="M0-6.2 1.9-1.9 6.4-1.6 3-1.1 4.1 3.5 0 1.2-4.1 3.5-3-1.1-6.4-1.6-1.9-1.9Z" transform="translate(${(i - 1) * 15} 0)" fill="${i < T[2] ? P[0] : 'rgba(0,0,0,.35)'}" ${i < T[2] ? `filter="url(#${u}g)"` : ''}/>`).join('');
   const mt = o.mtData || COIN_MT;
   const lg = o.logoData || COIN_LOGO;
@@ -29,7 +39,7 @@ function coinFace(g, tk, face, o = {}) {
     <circle cx="100" cy="100" r="99" fill="url(#${u}m)" stroke="${P[4]}" stroke-width="2"/>
     <circle cx="100" cy="100" r="95.5" fill="none" stroke="${P[3]}" stroke-opacity=".55" stroke-width="4.4" stroke-dasharray="1.5 2.3"/>
     <circle cx="100" cy="100" r="91" fill="none" stroke="${P[3]}" stroke-width="1.4"/><circle cx="100" cy="100" r="89.8" fill="none" stroke="${P[5]}" stroke-opacity=".8" stroke-width=".8"/>
-    <text font-size="11.5" font-weight="800" letter-spacing="1.1" fill="${P[3]}" stroke="${P[5]}" stroke-width=".25" paint-order="stroke"><textPath href="#${u}p" xlink:href="#${u}p" startOffset="2" textLength="505" lengthAdjust="spacing">${rim}</textPath></text>
+    ${coinRim(rim, P)}
     <circle cx="100" cy="100" r="72.5" fill="url(#${u}n)" stroke="${P[3]}" stroke-width="1.4"/><circle cx="100" cy="100" r="67.5" fill="${P[3]}"/>
     <circle cx="100" cy="100" r="66" fill="url(#${u}e)"/><circle cx="100" cy="100" r="66" fill="none" stroke="#000" stroke-opacity=".35" stroke-width="2.4"/>
     ${content}
