@@ -270,3 +270,33 @@ function boot() {
   window.addEventListener('storage', () => { if (view.name !== 'admin') refreshBoard(); });
   setInterval(async () => { if (!playing() && view.name !== 'admin') { await SaifStore.sync(); refreshBoard(); } }, 5000);
 }
+
+/* ---------- شاشة الانتظار (لودر الموشن): المس الشاشة ليفتح الموقع ----------
+   تظهر في وضع العرض فقط (?kiosk أو ?attract) وتعود بعد فترة بلا لمس. */
+const ATTRACT_IDLE = 90;   // ثانية بلا لمس في الرئيسية قبل العودة للموشن
+function initAttract() {
+  const el = document.createElement('div');
+  el.id = 'attract'; el.setAttribute('role', 'button'); el.tabIndex = 0;
+  el.innerHTML = '<video muted loop playsinline autoplay preload="auto" poster="video/saif-loader-poster.jpg" src="video/saif-loader.mp4"></video>' +
+    '<div class="at-hint"><span class="at-dot"></span><b>' + (window.SAIF_EN ? 'Touch the screen to start' : 'المس الشاشة للبدء') + '</b></div>';
+  const vid = el.firstChild;
+  let shown = false, idleT = null;
+  const show = () => {
+    if (shown) return; shown = true; S.lvOf = {};
+    if (location.hash !== '#s' + (view.screen || 1) && view.name !== 'home') { view = { name: 'home', screen: view.screen || 1 }; render(); }
+    document.body.appendChild(el); el.classList.remove('out'); vid.currentTime = 0; vid.play().catch(() => {});
+  };
+  const hide = () => {
+    if (!shown) return; shown = false; el.classList.add('out');
+    setTimeout(() => { if (!shown) { vid.pause(); el.remove(); } }, 450); arm();
+  };
+  const arm = () => {
+    clearTimeout(idleT);
+    idleT = setTimeout(() => (shown || playing() || view.name === 'admin') ? arm() : show(), ATTRACT_IDLE * 1000);
+  };
+  el.addEventListener('pointerdown', e => { e.preventDefault(); hide(); });
+  el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') hide(); });
+  ['pointerdown', 'keydown'].forEach(t => document.addEventListener(t, () => { if (!shown) arm(); }, true));
+  show();
+}
+if (KIOSK || new URLSearchParams(location.search).has('attract')) window.addEventListener('DOMContentLoaded', initAttract);
