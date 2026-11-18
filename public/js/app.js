@@ -299,4 +299,5 @@ function initAttract() {
   ['pointerdown', 'keydown'].forEach(t => document.addEventListener(t, () => { if (!shown) arm(); }, true));
   show();
 }
-if (KIOSK || new URLSearchParams(location.search).has('attract')) window.addEventListener('DOMContentLoaded', initAttract);
+{ const q = new URLSearchParams(location.search), big = matchMedia('(min-width:1000px) and (pointer:fine), (min-width:1400px)').matches;
+  if (!q.has('noattract') && (KIOSK || q.has('attract') || big) && !/#admin/.test(location.hash)) window.addEventListener('DOMContentLoaded', initAttract); }
