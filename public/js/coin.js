@@ -1,6 +1,7 @@
 /* كوين تجارب طويق التفاعلية (Challenge Coin): وجهه شعار سيف، وظهره جبل طويق */
 const COIN_PAL = { gold: ['#fff1a8', '#f0c445', '#c28a22', '#6d4510', '#a8741a', '#ffe596', '#4a2d08'], silver: ['#ffffff', '#dfe6ea', '#9aa7ad', '#556167', '#7f8b91', '#f3f7f9', '#323c41'], bronze: ['#ffd7b3', '#dc9158', '#a65d34', '#58301a', '#8a4c2a', '#f0b184', '#3f1f0e'] };
 const COIN_LOGO = 'img/saif-logo-hd.png', COIN_MT = 'img/tuwaiq-mountain-hd.png';
+const TRX = s => (window.SAIF_TR ? SAIF_TR(s) : s);
 const COIN_LV = [null, ['سهل', 'EASY'], ['متوسط', 'MEDIUM'], ['صعب', 'HARD']];
 const COIN_TIER = { gold: ['الذهبي', 'GOLD', 3], silver: ['الفضي', 'SILVER', 2], bronze: ['البرونزي', 'BRONZE', 1] };
 const coinEsc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -76,8 +77,8 @@ async function coinPng(g, tk, score, o = {}) {
   const draw = (svg, cx, cy, r) => new Promise(res => { const i = new Image(); i.onload = () => { x.save(); x.shadowColor = 'rgba(0,0,0,.5)'; x.shadowBlur = 36; x.shadowOffsetY = 22; x.fillStyle = '#000'; x.beginPath(); x.arc(cx, cy, r * .985, 0, 7); x.fill(); x.restore(); x.drawImage(i, cx - r, cy - r, r * 2, r * 2); res(); }; i.onerror = res; i.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg.replace('<svg ', '<svg width="800" height="800" ')); });
   const oo = Object.assign({}, o, { score, logoData, mtData, defs });
   await draw(coinFace(g, tk, 'f', oo), 430, 510, 290); await draw(coinFace(g, tk, 'b', oo), 1170, 510, 290);
-  x.fillStyle = '#F4F2EA'; x.textAlign = 'center'; x.font = '800 58px Tajawal'; x.fillText('كوين تجارب طويق التفاعلية', W / 2, 90);
-  x.font = '700 38px Tajawal'; x.fillStyle = '#E8C77A'; x.fillText(`${g.badge} · ${o.lv ? 'الصعوبة ' + COIN_LV[o.lv][0] + ' · ' : ''}المستوى ${T[0]}${score ? ' · ' + score + ' نقطة' : ''}`, W / 2, 140);
+  x.fillStyle = '#F4F2EA'; x.textAlign = 'center'; x.font = '800 58px Tajawal'; x.fillText(TRX('كوين تجارب طويق التفاعلية'), W / 2, 90);
+  x.font = '700 38px Tajawal'; x.fillStyle = '#E8C77A'; x.fillText(TRX(`${g.badge} · ${o.lv ? 'الصعوبة ' + COIN_LV[o.lv][0] + ' · ' : ''}المستوى ${T[0]}${score ? ' · ' + score + ' نقطة' : ''}`), W / 2, 140);
   x.font = '600 30px Tajawal'; x.fillStyle = '#C7D3D1'; x.fillText('SAIF 2026', W / 2, H - 50);
   return cv;
 }

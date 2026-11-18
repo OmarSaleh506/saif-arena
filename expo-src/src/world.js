@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { R, rr, pick, ctex, addNoise, blotches, tiled, labelSprite, labelPlane, box, colorGeo, TAU } from './util.js';
+import { tr, R, rr, pick, ctex, addNoise, blotches, tiled, labelSprite, labelPlane, box, colorGeo, TAU } from './util.js';
 
 /* إحداثيات بالمتر: المبنى 196×112، الشمال = -z، والواجهة الرئيسية جنوبًا (z=+56) */
 export const GATES = [
@@ -153,7 +153,7 @@ export function buildWorld(scene, q) {
 
   /* ---------- المسرح والمقاعد ---------- */
   B.add(box(36, 1.4, 8, std({ color: 0x1c2026, roughness: .5, metalness: .3 }), -71, .9, -26));
-  const led = new THREE.Mesh(new THREE.PlaneGeometry(30, 8), new THREE.MeshBasicMaterial({ toneMapped: false, map: (() => { const t = ctex(1024, 272, (c, w, h) => { const g = c.createLinearGradient(0, 0, w, h); g.addColorStop(0, '#0d3b66'); g.addColorStop(.5, '#1b6a8a'); g.addColorStop(1, '#C9705F'); c.fillStyle = g; c.fillRect(0, 0, w, h); c.fillStyle = '#fff'; c.font = '800 100px Tajawal, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('تجارب طويق التفاعلية', w / 2, h / 2 - 16); c.font = '600 44px Tajawal, sans-serif'; c.fillText('SAIF ARENA 2026', w / 2, h - 46); }, { srgb: true }); t.repeat.set(1, 1); return t; })() }));
+  const led = new THREE.Mesh(new THREE.PlaneGeometry(30, 8), new THREE.MeshBasicMaterial({ toneMapped: false, map: (() => { const t = ctex(1024, 272, (c, w, h) => { const g = c.createLinearGradient(0, 0, w, h); g.addColorStop(0, '#0d3b66'); g.addColorStop(.5, '#1b6a8a'); g.addColorStop(1, '#C9705F'); c.fillStyle = g; c.fillRect(0, 0, w, h); c.fillStyle = '#fff'; const led = tr('تجارب طويق التفاعلية'); let fz = 100; c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = `800 ${fz}px Tajawal, sans-serif`; while (c.measureText(led).width > w - 60 && fz > 30) { fz -= 4; c.font = `800 ${fz}px Tajawal, sans-serif`; } c.fillText(led, w / 2, h / 2 - 16); c.font = '600 44px Tajawal, sans-serif'; c.fillText('SAIF 2026', w / 2, h - 46); }, { srgb: true }); t.repeat.set(1, 1); return t; })() }));
   led.position.set(-71, 6.4, -29.6); B.add(led);
   [-86, -56].forEach(x => B.add(box(.5, 9.6, .5, M.darkSteel, x, 4.8, -29)));
   B.add(box(32, .5, .5, M.darkSteel, -71, 10, -27));

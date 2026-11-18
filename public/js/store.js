@@ -172,7 +172,7 @@ const SaifStore = (() => {
   const E = s => '"' + String(s).replace(/"/g, '""') + '"';
   const safe = s => (s.length && '=+-@\t\r'.includes(s[0]) ? "'" + s : s);
   const gname = id => (GAMES.find(g => g.id === id) || { badge: id }).badge;
-  const blob = t => new Blob(['﻿' + t], { type: 'text/csv;charset=utf-8' });
+  const blob = t => new Blob(['﻿' + (window.SAIF_TR ? SAIF_TR(t) : t)], { type: 'text/csv;charset=utf-8' });
   function csvDay(day) {
     const rep = dayReport(day);
     return blob('اليوم,الترتيب,الاسم,الجوال,التجربة,الشاشة,أفضل نقاط,المستوى,عدد الجولات\n' + rep.rows.map(r => [day, r.rank, E(safe(r.name)), E(safe(r.phone)), E(gname(r.game)), r.screen, r.score, r.tier, r.roundsPlayed].join(',')).join('\n'));

@@ -33,12 +33,14 @@ export function blotches(ctx, w, h, n, col, rmin, rmax, alpha) {
 export function tiled(tex, w, d, size) { const t = tex.clone(); t.needsUpdate = true; t.repeat.set(w / size, d / size); return t; }
 
 /* لافتة نصية عربية على لوحة */
+export const tr = s => (typeof window !== 'undefined' && window.SAIF_TR) ? window.SAIF_TR(s) : s;
 export function labelTexture(text, { w = 512, h = 128, bg = 'rgba(8,26,25,.82)', fg = '#F4F2EA', size = 64, border = '#84B6C6', sub = '' } = {}) {
+  text = tr(text); sub = tr(sub);
   const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d');
   const r = h * .22;
   x.fillStyle = bg; x.beginPath(); x.roundRect(4, 4, w - 8, h - 8, r); x.fill();
   if (border) { x.lineWidth = 5; x.strokeStyle = border; x.stroke(); }
-  x.fillStyle = fg; x.textAlign = 'center'; x.textBaseline = 'middle'; x.direction = 'rtl';
+  x.fillStyle = fg; x.textAlign = 'center'; x.textBaseline = 'middle'; x.direction = /[\u0600-\u06FF]/.test(text) ? 'rtl' : 'ltr';
   let fs = size; x.font = `800 ${fs}px Tajawal, sans-serif`; while (x.measureText(text).width > w - 36 && fs > 18) { fs -= 3; x.font = `800 ${fs}px Tajawal, sans-serif`; } x.fillText(text, w / 2, sub ? h * .4 : h / 2 + 2);
   if (sub) { x.font = `600 ${size * .5}px Tajawal, sans-serif`; x.fillStyle = '#C7D3D1'; x.fillText(sub, w / 2, h * .74); }
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;

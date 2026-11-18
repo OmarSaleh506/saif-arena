@@ -85,5 +85,5 @@ const AdminView = (() => {
     timer = setInterval(async () => { if (view.name === 'admin' && !document.activeElement.matches('input,select')) { await SaifStore.sync(); const y = window.scrollY; draw(); window.scrollTo(0, y); } }, 15000);
   }
 
-  return { render(el) { root = el; document.title = 'لوحة التحكم · تجارب طويق التفاعلية'; draw(); if (ok()) SaifStore.sync().then(r => { if (r && view.name === 'admin' && !document.activeElement.matches('input,select')) draw(); }); } };
+  return { render(el) { root = el; document.title = SAIF_TR('لوحة التحكم · تجارب طويق التفاعلية'); draw(); if (ok()) SaifStore.sync().then(r => { if (r && view.name === 'admin' && !document.activeElement.matches('input,select')) draw(); }); } };
 })();

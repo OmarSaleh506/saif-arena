@@ -319,3 +319,8 @@ body.modal-open{overflow:hidden}
 .sa-lvs span.on{border-color:currentColor;background:rgba(255,255,255,.05);box-shadow:0 0 0 3px rgba(255,255,255,.04)}
 .sa-lvnote{font-size:.85rem;opacity:.75;margin:.2rem 0 .8rem}
 .sa-lvtag{display:inline-block;margin:.2rem 0 0;padding:.15rem .9rem;border:1.5px solid currentColor;border-radius:999px;font-weight:800;font-size:.95rem}
+
+/* English (LTR) */
+html[lang=en] #stage{direction:ltr}
+html[lang=en] .sa-gcard,html[lang=en] .sa-form,html[lang=en] .x3q .opt{text-align:left}
+html[lang=en] .sa-lvs span{text-align:center}

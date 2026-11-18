@@ -59,7 +59,7 @@ const medal = n => `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden=
 /* ---------- مكوّنات مشتركة ---------- */
 function header() {
   const fs = document.fullscreenEnabled ? `<button type="button" class="sa-chip" id="fs" aria-label="ملء الشاشة">${I('Monitor')}<span>ملء الشاشة</span></button>` : '';
-  return `<header class="sa-top"><a class="sa-brand" href="#s${view.screen || 1}"><img src="${LOGO}" alt=""><span><b>تجارب طويق التفاعلية</b><small>${SCREENS[view.screen || 1].topic}</small></span></a><div class="sa-top-acts">${fs}</div></header>`;
+  return `<header class="sa-top"><a class="sa-brand" href="#s${view.screen || 1}"><img src="${LOGO}" alt=""><span><b>تجارب طويق التفاعلية</b><small>${SCREENS[view.screen || 1].topic}</small></span></a><div class="sa-top-acts">${fs}<button type="button" class="sa-chip" id="lang" aria-label="${SAIF_EN ? 'Switch to Arabic' : 'Switch to English'}"><span>${SAIF_EN ? 'عربي' : 'English'}</span></button></div></header>`;
 }
 const crowdBlock = () => (SaifStore.config().crowd && !MOBILE) ? `<div class="sa-crowd"><div class="sa-crowd-qr">${qrSvg(playUrl())}</div><div><b>${I('QrCode')} الدور طويل؟ العب من جوالك</b><small>امسح الرمز وسجّل نتيجتك، وتظهر هنا في الصدارة.</small></div></div>` : '';
 function boardPanel(hl) {
@@ -83,6 +83,7 @@ function refreshBoard() {
   const r = side.querySelector('.sa-rows'); if (r) r.scrollTop = top;
 }
 function bindShell() {
+  const lg = document.getElementById('lang'); if (lg) lg.onclick = () => SAIF_SETLANG(SAIF_EN ? 'ar' : 'en');
   const fs = document.getElementById('fs');
   if (fs) fs.onclick = () => { try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); } catch (e) {} };
   const side = document.getElementById('side');
@@ -206,7 +207,7 @@ function result(o) {
 function renderResult() {
   const r = view.res, { g, o, score, t, lv, ratio } = r, scr = view.screen, closed = SaifStore.stats().closed, pl = KIOSK ? { name: '', phone: '' } : SaifStore.player();
   const lIcons = ['Lock', 'Eye', 'ShieldAlert', 'Fingerprint'], first = !r.celebrated, up = ratio >= 0.6 && lv < 3; r.serial = r.serial || (1000 + Math.floor(Math.random() * 8999));
-  const coinUrl = siteUrl().replace(/[?#].*$/, '').replace(/[^/]*$/, '') + `coin.html?g=${encodeURIComponent(g.id)}&t=${t[0]}&s=${score}&c=${scr}&n=${r.serial}&l=${lv}`;
+  const coinUrl = siteUrl().replace(/[?#].*$/, '').replace(/[^/]*$/, '') + `coin.html?g=${encodeURIComponent(g.id)}&t=${t[0]}&s=${score}&c=${scr}&n=${r.serial}&l=${lv}${SAIF_EN ? '&lang=en' : ''}`;
   const form = r.saved ? `<div class="sa-saved">${I('CircleCheck')}<span>تم تسجيلك باسم <b>${esc(r.saved.name)}</b> · المركز <b>#${r.rank}</b> اليوم</span></div>`
     : closed ? `<p class="sa-banner">${I('Lock')} انتهت فعالية اليوم، لا يمكن تسجيل أسماء جديدة في الصدارة.</p>`
     : `<form class="sa-form" id="idf" novalidate>
@@ -250,7 +251,7 @@ function renderResult() {
 
 /* ---------- التوجيه ---------- */
 function render() {
-  document.title = 'تجارب طويق التفاعلية'; app.hidden = playing(); app.onpointerdown = app.onkeydown = null;
+  document.title = SAIF_TR('تجارب طويق التفاعلية'); app.hidden = playing(); app.onpointerdown = app.onkeydown = null;
   document.body.classList.toggle('is-admin', view.name === 'admin');
   if (view.name === 'result' && view.res) return renderResult();
   if (view.name === 'admin') { clearTimeout(autoBack); return AdminView.render(app); }
