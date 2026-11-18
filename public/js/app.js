@@ -281,8 +281,19 @@ function initAttract() {
     '<div class="at-hint"><span class="at-dot"></span><b>' + (window.SAIF_EN ? 'Touch the screen to start' : 'المس الشاشة للبدء') + '</b></div>';
   const vid = el.firstChild;
   // قريبة من 16:9 نملأ الشاشة (cover)، وغير ذلك نعرض كامل الفيديو بدون قص (contain) بخلفية بنفس لونه
-  const fit = () => { const r = innerWidth / innerHeight; vid.style.objectFit = (r > 1.7 && r < 1.86) ? 'cover' : 'contain'; };
-  fit(); addEventListener('resize', fit);
+  const fit = () => { const r = innerWidth / innerHeight, vp = vid.videoHeight > vid.videoWidth; vid.style.objectFit = (!vp && r > 1.7 && r < 1.86) || (vp && r > 0.54 && r < 0.59) ? 'cover' : 'contain'; };
+  vid.addEventListener('loadedmetadata', () => fit());
+  // شاشة بالطول: نستخدم نسخة الموشن العمودية (9:16) إن وُجدت، وإلا نرجع للأفقية
+  let mode = '';
+  const pick = () => {
+    const por = innerHeight > innerWidth * 1.1, m = por ? 'p' : 'l'; if (m === mode) return; mode = m;
+    el.classList.toggle('por', por);
+    vid.onerror = por ? () => { vid.onerror = null; vid.src = 'video/saif-loader.mp4'; vid.poster = 'video/saif-loader-poster.jpg'; vid.play().catch(() => {}); } : null;
+    vid.poster = por ? 'video/saif-loader-portrait-poster.jpg' : 'video/saif-loader-poster.jpg';
+    vid.src = por ? 'video/saif-loader-portrait.mp4' : 'video/saif-loader.mp4'; vid.play().catch(() => {});
+  };
+  fit(); addEventListener('resize', () => { fit(); pick(); });
+  if (innerHeight > innerWidth * 1.1) pick();
   let shown = false, idleT = null;
   const show = () => {
     if (shown) return; shown = true; S.lvOf = {};
