@@ -280,6 +280,9 @@ function initAttract() {
   el.innerHTML = '<video muted loop playsinline autoplay preload="auto" poster="video/saif-loader-poster.jpg" src="video/saif-loader.mp4"></video>' +
     '<div class="at-hint"><span class="at-dot"></span><b>' + (window.SAIF_EN ? 'Touch the screen to start' : 'المس الشاشة للبدء') + '</b></div>';
   const vid = el.firstChild;
+  // قريبة من 16:9 نملأ الشاشة (cover)، وغير ذلك نعرض كامل الفيديو بدون قص (contain) بخلفية بنفس لونه
+  const fit = () => { const r = innerWidth / innerHeight; vid.style.objectFit = (r > 1.7 && r < 1.86) ? 'cover' : 'contain'; };
+  fit(); addEventListener('resize', fit);
   let shown = false, idleT = null;
   const show = () => {
     if (shown) return; shown = true; S.lvOf = {};
