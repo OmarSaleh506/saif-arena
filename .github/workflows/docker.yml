@@ -1,0 +1,62 @@
+name: docker
+
+on:
+  pull_request:
+    branches: [main, staging]
+  push:
+    branches: [main, staging]
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  PROJECT: saif-arena
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22.11.0", cache: npm }
+      - run: npm ci
+      - run: npm test
+
+  image:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+
+      # في طلبات الدمج: بناء فقط بدون دفع
+      - name: Build only (pull request)
+        if: github.event_name == 'pull_request'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+
+      # عند الدفع إلى main أو staging: بناء ودفع
+      - name: Compute image name and tag
+        if: github.event_name == 'push'
+        run: |
+          OWNER="$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')"
+          if [ "${GITHUB_REF_NAME}" = "main" ]; then NAME="${PROJECT}"; else NAME="stg-${PROJECT}"; fi
+          TAG="1.$(date -u +%Y%m%d%H%M%S)"
+          echo "IMAGE=ghcr.io/${OWNER}/${NAME}:${TAG}" >> "$GITHUB_ENV"
+      - name: Login to registry
+        if: github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        if: github.event_name == 'push'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ env.IMAGE }}

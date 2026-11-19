@@ -1,0 +1,42 @@
+# تشغيل المنصة كاملة على جهاز واحد: docker compose up --build
+# (التطبيق + PostgreSQL). لا Redis ولا طابور لأن المنصة لا تستعملهما.
+services:
+  db:
+    image: postgres:16.4-alpine
+    environment:
+      POSTGRES_USER: saif
+      POSTGRES_PASSWORD: saif-local-password
+      POSTGRES_DB: saif
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U saif -d saif"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  migrate:
+    build: .
+    command: ["node", "src/migrate.mjs"]
+    environment:
+      DATABASE_URL: postgres://saif:saif-local-password@db:5432/saif
+      DB_SSLMODE: disable
+    depends_on:
+      db: { condition: service_healthy }
+    restart: "no"
+
+  web:
+    build: .
+    ports: ["8080:8080"]
+    environment:
+      PORT: "8080"
+      NODE_ENV: production
+      APP_URL: http://localhost:8080
+      ADMIN_PIN: local-admin-pin
+      DATABASE_URL: postgres://saif:saif-local-password@db:5432/saif
+      DB_SSLMODE: disable
+      DB_POOL_MAX: "10"
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+
+volumes:
+  pgdata:
