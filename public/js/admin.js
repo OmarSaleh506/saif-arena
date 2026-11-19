@@ -24,12 +24,14 @@ const AdminView = (() => {
   }
 
   function gate() {
-    root.innerHTML = `${header()}<main class="ad-wrap"><section class="sa-glass ad-gate"><span class="ad-lock">${I('Lock')}</span><h1>لوحة التحكم</h1><p>أدخل رمز الدخول لعرض النتائج والتقارير.</p>
-      <form id="gf" novalidate><label>رمز الدخول<input id="pin" type="password" inputmode="numeric" autocomplete="off" dir="ltr" autofocus></label>
+    const setup = SaifStore.needsSetup();
+    root.innerHTML = `${header()}<main class="ad-wrap"><section class="sa-glass ad-gate"><span class="ad-lock">${I('Lock')}</span><h1>لوحة التحكم</h1><p>${setup ? 'أول دخول على هذا الجهاز: اختر رمز دخول من 6 خانات على الأقل (أرقام أو أحرف) ولا تشاركه عبر البريد أو الرسائل.' : 'أدخل رمز الدخول لعرض النتائج والتقارير.'}</p>
+      <form id="gf" novalidate><label>${setup ? 'اختر رمز الدخول' : 'رمز الدخول'}<input id="pin" type="password" autocomplete="off" dir="ltr" autofocus></label>
       <p class="sa-err" role="alert" ${gerr ? '' : 'hidden'}>${gerr}</p><button class="sa-btn" type="submit">دخول</button></form></section></main>`;
     document.getElementById('gf').onsubmit = async e => {
       e.preventDefault(); const v = document.getElementById('pin').value;
-      if (await SaifStore.verifyPin(v)) { try { sessionStorage.setItem('saif_admin', '1'); sessionStorage.setItem('saif_admin_pin', v); } catch (x) {} gerr = ''; await SaifStore.sync(); draw(); } else { gerr = 'الرمز غير صحيح.'; gate(); }
+      if (setup) { if (v.length < 6) { gerr = 'الرمز يجب ألا يقل عن 6 خانات.'; return gate(); } await SaifStore.setLocalPin(v); }
+      if (await SaifStore.verifyPin(v)) { try { sessionStorage.setItem('saif_admin', '1'); sessionStorage.setItem('saif_admin_pin', v); } catch (x) {} gerr = ''; await SaifStore.sync(); draw(); } else { gerr = SaifStore.authReason() === 'nopin' ? 'لم يُضبط رمز الدخول على الخادم بعد (متغير ADMIN_PIN، 6 خانات فأكثر).' : 'الرمز غير صحيح.'; gate(); }
     };
   }
 
@@ -39,7 +41,7 @@ const AdminView = (() => {
     const s = SaifStore.summary(day || undefined), d = s.day, rep = d === 'all' ? null : SaifStore.dayReport(d), wins = SaifStore.winners(3), list = SaifStore.roundsList(d), cfg = SaifStore.config();
     const days = [...new Set([SaifStore.today(), ...s.days])];
     const maxG = Math.max(1, ...s.byGame.map(x => x.rounds)), maxH = Math.max(1, ...s.byHour.map(x => x.rounds));
-    const base = location.origin + location.pathname, pubBase = (cfg.publicUrl || base).replace(/\/$/, '') + '/';
+    const base = location.origin + location.pathname, pubBase = (cfg.publicUrl || base).replace(/[?#].*$/, '').replace(/index\.html$/, '').replace(/\/*$/, '/');
     root.innerHTML = `${header()}<main class="ad-wrap">
       <div class="ad-head"><div><h1>لوحة التحكم</h1><p class="sa-muted">${SaifStore.mode() === 'remote' ? `<span class="ad-pill ${SaifStore.online() ? 'open' : 'closed'}">${SaifStore.online() ? 'متصل بالخادم المشترك' : 'غير متصل · سيُعاد الإرسال'}</span> جميع الشاشات والجوالات في تقرير واحد.` : 'وضع محلي: البيانات محفوظة في هذا المتصفح فقط.'}</p></div>
         <div class="ad-acts"><label class="ad-sel">اليوم<select id="dsel">${days.map(x => `<option value="${x}" ${x === d ? 'selected' : ''}>${x}${x === SaifStore.today() ? ' (اليوم)' : ''}</option>`).join('')}<option value="all" ${d === 'all' ? 'selected' : ''}>كل الأيام</option></select></label>
@@ -53,9 +55,9 @@ const AdminView = (() => {
       </div>
       <section class="sa-glass ad-card"><div class="ad-row"><div><h2>تقرير ${d === 'all' ? 'كل الأيام' : 'اليوم ' + d} ${rep ? (rep.closed ? '<span class="ad-pill closed">مغلق</span>' : '<span class="ad-pill open">مفتوح</span>') : ''}</h2><p class="sa-muted">أفضل نتيجة لكل مشارك مع رقم التواصل. الثلاثة الأوائل مظللون.</p></div>
         <div class="ad-acts">${rep ? `<button class="sa-btn ghost" id="csvd">${I('Mail')} تصدير CSV لليوم</button><button class="sa-btn ghost" id="endd">${rep.closed ? 'فتح اليوم من جديد' : 'إنهاء اليوم'}</button>` : ''}<button class="sa-btn ghost" id="csva">تصدير كل الجولات</button></div></div>
-        ${rep ? `<div class="ad-tw"><table><thead><tr><th>#</th><th>الاسم</th><th>الجوال</th><th>التجربة</th><th>النتيجة</th><th>الجولات</th></tr></thead><tbody>${rep.rows.length ? rep.rows.map(r => `<tr class="${r.rank <= 3 ? 't3' : ''}"><td>${r.rank}</td><td>${esc(r.name)}</td><td dir="ltr">${esc(r.phone)}</td><td>${esc(gname(r.game))}</td><td>${tierDot(r.tier)} ${r.score}</td><td>${r.roundsPlayed}</td></tr>`).join('') : '<tr><td colspan="6" class="sa-muted">لا مشاركين مسجَّلين بعد.</td></tr>'}</tbody></table></div>` : ''}</section>
+        ${rep ? `<div class="ad-tw"><table><thead><tr><th>#</th><th>الاسم</th><th>التجربة</th><th>النتيجة</th><th>الجولات</th></tr></thead><tbody>${rep.rows.length ? rep.rows.map(r => `<tr class="${r.rank <= 3 ? 't3' : ''}"><td>${r.rank}</td><td>${esc(r.name)}</td><td>${esc(gname(r.game))}</td><td>${tierDot(r.tier)} ${r.score}</td><td>${r.roundsPlayed}</td></tr>`).join('') : '<tr><td colspan="6" class="sa-muted">لا مشاركين مسجَّلين بعد.</td></tr>'}</tbody></table></div>` : ''}</section>
       <section class="sa-glass ad-card"><div class="ad-row"><div><h2>الفائزون كل يوم</h2><p class="sa-muted">أول ثلاثة في كل يوم مع رقم التواصل.</p></div><div class="ad-acts"><button class="sa-btn ghost" id="csvw">تصدير CSV للفائزين</button></div></div>
-        ${wins.length ? wins.map(w => `<div class="ad-win"><b>${w.day}</b> ${w.open ? '<span class="ad-pill open">مفتوح</span>' : ''}<span class="sa-muted">${w.participants} مشارك · ${w.rounds} جولة</span><ol>${w.top.map(x => `<li><span>${medal(x.rank)}</span><b>${esc(x.name)}</b><span dir="ltr" class="sa-muted">${esc(x.phone)}</span><em>${x.score}</em></li>`).join('')}</ol></div>`).join('') : '<p class="sa-muted">لا فائزين بعد.</p>'}</section>
+        ${wins.length ? wins.map(w => `<div class="ad-win"><b>${w.day}</b> ${w.open ? '<span class="ad-pill open">مفتوح</span>' : ''}<span class="sa-muted">${w.participants} مشارك · ${w.rounds} جولة</span><ol>${w.top.map(x => `<li><span>${medal(x.rank)}</span><b>${esc(x.name)}</b><em>${x.score}</em></li>`).join('')}</ol></div>`).join('') : '<p class="sa-muted">لا فائزين بعد.</p>'}</section>
       <section class="sa-glass ad-card"><h2>آخر الجولات</h2><p class="sa-muted">أخفِ أي جولة غير مرغوبة من لوحة الصدارة (تبقى في التقارير الداخلية).</p>
         <div class="ad-tw"><table><thead><tr><th>الوقت</th><th>الاسم</th><th>التجربة</th><th>النتيجة</th><th></th></tr></thead><tbody>${list.length ? list.map(r => `<tr class="${r.hidden ? 'dim' : ''}"><td>${fmtTs(r.ts)}</td><td>${r.name ? esc(r.name) : '<span class="sa-muted">بدون اسم</span>'}</td><td>${esc(gname(r.game))} · ${lvName(r.lv)}</td><td>${tierDot(r.tier)} ${r.score}</td><td><button class="ad-mini" data-hide="${r.id}" data-to="${r.hidden ? 0 : 1}">${r.hidden ? 'إظهار' : 'إخفاء'}</button></td></tr>`).join('') : '<tr><td colspan="5" class="sa-muted">لا جولات.</td></tr>'}</tbody></table></div></section>
       <section class="sa-glass ad-card"><h2>الشاشات وزحمة البوث</h2>

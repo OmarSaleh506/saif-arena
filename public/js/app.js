@@ -18,7 +18,7 @@ const SCREENS = {
     topic: 'الذكاء الاصطناعي والبيانات', kicker: 'الشاشة 2 · الذكاء الاصطناعي والبيانات', title: 'علّم الآلة وابنِ مدينة المستقبل',
     hook: 'اكشف المزيّف، درّب نموذجًا، وحلّل البيانات، وابنِ مدينة ذكية بالرؤية والدرونز والروبوتات.',
     sections: [
-      { icon: 'Eye', title: 'هل تثق بما ترى؟', sub: 'ميّز الحقيقي من المولّد بالذكاء الاصطناعي، وجِد الشاذ بين مئات النقاط', games: ['deepfake', 'pattern'] },
+      { icon: 'Eye', title: 'هل تثق بما ترى؟', sub: 'ميّز الحقيقي من المولّد بالذكاء الاصطناعي، وجِد الشاذ بين عشرات النقاط', games: ['deepfake', 'pattern'] },
       { icon: 'Lightbulb', title: 'درّب عقلًا آليًا', sub: 'صنّف الرسائل وحلّل بيانات الزوار، وشاهد القرار يتحسّن', games: ['ml', 'b2'] },
       { icon: 'MapPin', title: 'مدينة المستقبل', sub: 'عيون ترى، درونز تطير، وروبوتات تحرس: ابنِ مدينتك الذكية', games: ['b1', 'b3', 'b4'] },
     ] },
@@ -57,9 +57,13 @@ const playUrl = () => siteUrl().replace(/[?#].*$/, '') + '?m=1';
 const medal = n => `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="9" r="6" fill="currentColor"/><path d="M8 14l-2 8 6-3 6 3-2-8" fill="currentColor" opacity=".55"/><text x="12" y="12" text-anchor="middle" font-size="8.5" font-weight="800" fill="#0C2423" font-family="Tajawal,sans-serif">${n}</text></svg>`;
 
 /* ---------- مكوّنات مشتركة ---------- */
+/* الوضع الداكن/الفاتح للواجهة (القشرة فقط؛ التحديات نفسها تبقى داكنة) */
+const themeNow = () => document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+function setTheme(t) { document.documentElement.dataset.theme = t; try { localStorage.setItem('saif-theme', t); } catch (e) {} const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = t === 'light' ? '#F4F2EA' : '#0C2423'; }
+try { const t = localStorage.getItem('saif-theme'); if (t === 'light') document.documentElement.dataset.theme = 'light'; } catch (e) {}
 function header() {
   const fs = document.fullscreenEnabled ? `<button type="button" class="sa-chip" id="fs" aria-label="ملء الشاشة">${I('Monitor')}<span>ملء الشاشة</span></button>` : '';
-  return `<header class="sa-top"><a class="sa-brand" href="#s${view.screen || 1}"><img src="${LOGO}" alt=""><span><b>تجارب طويق التفاعلية</b><small>${SCREENS[view.screen || 1].topic}</small></span></a><div class="sa-top-acts">${fs}<button type="button" class="sa-chip" id="lang" aria-label="${SAIF_EN ? 'Switch to Arabic' : 'Switch to English'}"><span>${SAIF_EN ? 'عربي' : 'English'}</span></button></div></header>`;
+  return `<header class="sa-top"><a class="sa-brand" href="#s${view.screen || 1}"><img src="${LOGO}" alt=""><span><b>تجارب طويق التفاعلية</b><small>${SCREENS[view.screen || 1].topic}</small></span></a><div class="sa-top-acts">${fs}<button type="button" class="sa-chip" id="theme" aria-label="${SAIF_EN ? 'Switch light/dark mode' : 'تبديل الوضع الداكن والفاتح'}">${I(themeNow() === 'light' ? 'Moon' : 'Sun')}<span>${themeNow() === 'light' ? (SAIF_EN ? 'Dark' : 'داكن') : (SAIF_EN ? 'Light' : 'فاتح')}</span></button><button type="button" class="sa-chip lang" id="lang" aria-label="${SAIF_EN ? 'Switch to Arabic' : 'Switch to English'}"><span>${SAIF_EN ? 'عربي' : 'English'}</span></button></div></header>`;
 }
 const crowdBlock = () => (SaifStore.config().crowd && !MOBILE) ? `<div class="sa-crowd"><div class="sa-crowd-qr">${qrSvg(playUrl())}</div><div><b>${I('QrCode')} الدور طويل؟ العب من جوالك</b><small>امسح الرمز وسجّل نتيجتك، وتظهر هنا في الصدارة.</small></div></div>` : '';
 function boardPanel(hl) {
@@ -85,7 +89,11 @@ function refreshBoard() {
 function bindShell() {
   const lg = document.getElementById('lang'); if (lg) lg.onclick = () => SAIF_SETLANG(SAIF_EN ? 'ar' : 'en');
   const fs = document.getElementById('fs');
-  if (fs) fs.onclick = () => { try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); } catch (e) {} };
+  if (fs) fs.onclick = () => { const d = document, el = d.documentElement; try {
+    const p = d.fullscreenElement ? d.exitFullscreen() : (el.requestFullscreen ? el.requestFullscreen() : el.webkitRequestFullscreen && el.webkitRequestFullscreen());
+    if (p && p.catch) p.catch(() => toast('تعذّر تفعيل ملء الشاشة على هذا الجهاز'));
+  } catch (e) { toast('تعذّر تفعيل ملء الشاشة على هذا الجهاز'); } };
+  const th = document.getElementById('theme'); if (th) th.onclick = () => { setTheme(themeNow() === 'light' ? 'dark' : 'light'); render(); };
   const side = document.getElementById('side');
   if (side) side.onclick = e => { const b = e.target.closest('[data-bf]'); if (b) { boardFilter = +b.dataset.bf; refreshBoard(); } };
 }
@@ -205,39 +213,38 @@ function result(o) {
   boardHL = null; render(); window.scrollTo(0, 0);
 }
 function renderResult() {
-  const r = view.res, { g, o, score, t, lv, ratio } = r, scr = view.screen, closed = SaifStore.stats().closed, pl = KIOSK ? { name: '', phone: '' } : SaifStore.player();
-  const lIcons = ['Lock', 'Eye', 'ShieldAlert', 'Fingerprint'], first = !r.celebrated, up = ratio >= 0.6 && lv < 3; r.serial = r.serial || (1000 + Math.floor(Math.random() * 8999));
+  const r = view.res, { g, o, score, t, lv, ratio } = r, scr = view.screen, closed = SaifStore.stats().closed, pl = KIOSK ? { name: '' } : SaifStore.player();
+  const lIcons = ['Lock', 'Eye', 'ShieldAlert', 'Fingerprint'], first = !r.celebrated, up = ratio >= 0.6 && lv < 3, step = (r.saved || closed) ? 2 : (r.step || 1); r.serial = r.serial || (1000 + Math.floor(Math.random() * 8999));
   const coinUrl = siteUrl().replace(/[?#].*$/, '').replace(/[^/]*$/, '') + `coin.html?g=${encodeURIComponent(g.id)}&t=${t[0]}&s=${score}&c=${scr}&n=${r.serial}&l=${lv}${SAIF_EN ? '&lang=en' : ''}`;
   const form = r.saved ? `<div class="sa-saved">${I('CircleCheck')}<span>تم تسجيلك باسم <b>${esc(r.saved.name)}</b> · المركز <b>#${r.rank}</b> اليوم</span></div>`
     : closed ? `<p class="sa-banner">${I('Lock')} انتهت فعالية اليوم، لا يمكن تسجيل أسماء جديدة في الصدارة.</p>`
     : `<form class="sa-form" id="idf" novalidate>
         <label>اسمك<input name="name" maxlength="24" autocomplete="${KIOSK ? 'off' : 'name'}" placeholder="كيف نناديك؟" value="${esc(pl.name)}" required></label>
-        <label>رقم الجوال<input name="phone" inputmode="tel" dir="ltr" autocomplete="${KIOSK ? 'off' : 'tel'}" placeholder="05xxxxxxxx" value="${esc(pl.phone)}" required></label>
-        <p class="sa-note">رقمك للتواصل بخصوص الفعالية والجوائز فقط، ولا يظهر في لوحة الصدارة.</p>
+        <p class="sa-note">نستخدم اسمك فقط لعرضه في لوحة الصدارة، ولا نجمع أي بيانات تواصل. يطّلع عليه المنظّمون المخوّلون فقط.</p>
         <p class="sa-err" id="err" role="alert" hidden></p>
         <button type="submit" class="sa-btn">${I('Trophy')} سجّل اسمي في الصدارة</button></form>`;
-  app.innerHTML = `${header()}<div class="sa-layout"><main class="sa-main"><section class="sa-result">
+  app.innerHTML = `${header()}<div class="sa-layout${step === 1 ? ' solo' : ''}"><main class="sa-main"><section class="sa-result">
     <article class="sa-glass sa-score"><p class="sa-rhead">${o.timeout ? 'انتهى الوقت، وحصلت على كوين' : esc(o.head || 'أحسنت! حصلت على كوين')}</p>
       <div class="cn-stage ${first ? 'cn-drop' : ''}" id="cnst">${coinHTML(g, t[0], 'lg', true, { scr, score, n: r.serial, lv })}</div><h2>${esc(g.badge)}</h2><p class="sa-lvtag lv${lv}">الصعوبة: ${LV[lv].n}</p><p class="sa-rlevel" style="color:${t[2]}">المستوى ${t[1]}${o.detail ? ' · ' + esc(o.detail) : ''}</p>
       <div class="sa-big"><b class="grad">${score}</b><span>نقطة</span></div><p class="sa-rank">${r.saved ? 'ترتيبك' : 'ترتيبك المتوقع'} <b>#${r.rank}</b> اليوم</p>
-      <div id="idwrap">${form}</div>
-      <div class="sa-acts"><button type="button" class="sa-btn" id="ag">${up ? I('ChevronUp') + ' المستوى التالي: ' + LV[lv + 1].n : I('RotateCcw') + (lv === 3 && ratio >= 0.6 ? ' العب الصعب مرة أخرى' : ' أعد المحاولة')}</button><button type="button" class="sa-btn ghost" id="ot">${I('House')} تحدٍّ آخر</button></div>
+      ${step === 1 ? `<div class="sa-acts"><button type="button" class="sa-btn" id="nx">${I('Trophy')} التالي: سجّل اسمك واستلم كوينك</button></div>` : `<div id="idwrap">${form}</div>
+      <div class="sa-acts"><button type="button" class="sa-btn" id="ag">${up ? I('ChevronUp') + ' المستوى التالي: ' + LV[lv + 1].n : I('RotateCcw') + (lv === 3 && ratio >= 0.6 ? ' العب الصعب مرة أخرى' : ' أعد المحاولة')}</button><button type="button" class="sa-btn ghost" id="ot">${I('House')} تحدٍّ آخر</button></div>`}
       ${KIOSK ? '<p class="sa-muted" id="bk"></p>' : ''}</article>
-    <article class="sa-glass sa-learn"><h3>ماذا <span class="grad">تعلّمت؟</span></h3>${g.learn.map((l, i) => `<div class="sa-lii"><span class="k">${I(lIcons[i % 4])}</span><div>${esc(l)}</div></div>`).join('')}</article>
-    <article class="sa-glass sa-bag"><h3><span class="coral">${I('Award')}</span> خذ <span class="grad">كوينك</span> معك</h3>
-      <div class="sa-qr">${qrSvg(coinUrl)}</div><p class="sa-cap">امسح الرمز بجوالك لتحمّل كوين «${esc(g.badge)}» كصورة، ومعه الحقيبة المعرفية لشهر الأمن والتقنية</p></article>
-  </section></main><aside class="sa-side" id="side">${boardPanel(boardHL)}</aside></div>${footer()}`;
+    ${step === 1 ? `<article class="sa-glass sa-learn"><h3>ماذا <span class="grad">تعلّمت؟</span></h3>${g.learn.map((l, i) => `<div class="sa-lii"><span class="k">${I(lIcons[i % 4])}</span><div>${esc(l)}</div></div>`).join('')}</article>` : ''}
+    ${step === 2 ? `<article class="sa-glass sa-bag"><h3><span class="coral">${I('Award')}</span> خذ <span class="grad">كوينك</span> معك</h3>
+      <div class="sa-qr">${qrSvg(coinUrl)}</div><p class="sa-cap">امسح الرمز بجوالك لتحمّل كوين «${esc(g.badge)}» كصورة، ومعه الحقيبة المعرفية لشهر الأمن والتقنية</p></article>` : ''}
+  </section></main>${step === 2 ? `<aside class="sa-side" id="side">${boardPanel(boardHL)}</aside>` : ''}</div>${footer()}`;
   bindShell();
   if (first) { r.celebrated = true; coinCelebrate($('#cnst', app), t[0]); if (t[0] !== 'bronze') confetti(t); }
   const back = () => { if (KIOSK) S.lvOf = {}; view = { name: 'home', screen: scr }; location.hash = 's' + scr; render(); window.scrollTo(0, 0); };
-  $('#ag', app).onclick = () => start(g.id, up ? lv + 1 : lv);
-  $('#ot', app).onclick = back;
+  if (step === 1) { $('#nx', app).onclick = () => { r.step = 2; renderResult(); window.scrollTo(0, 0); }; }
+  else { $('#ag', app).onclick = () => start(g.id, up ? lv + 1 : lv); $('#ot', app).onclick = back; }
   const f = $('#idf', app);
   if (f) f.onsubmit = e => {
     e.preventDefault();
-    const nm = f.name.value, ph = f.phone.value, out = SaifStore.saveIdentity(r.roundId, nm, ph), er = $('#err', app);
-    if (!out.ok) { er.hidden = false; er.textContent = out.err === 'name' ? 'اكتب اسمًا من حرفين إلى 24 حرفًا.' : out.err === 'phone' ? 'اكتب رقم جوال صحيحًا، مثل 0501234567.' : out.err === 'closed' ? 'انتهت فعالية اليوم.' : 'تعذّر الحفظ، حاول مرة أخرى.'; shake(f); return; }
-    if (!KIOSK) SaifStore.savePlayer(out.name, out.phone);
+    const nm = f.name.value, out = SaifStore.saveIdentity(r.roundId, nm), er = $('#err', app);
+    if (!out.ok) { er.hidden = false; er.textContent = out.err === 'name' ? 'اكتب اسمًا من حرفين إلى 24 حرفًا.' : out.err === 'closed' ? 'انتهت فعالية اليوم.' : 'تعذّر الحفظ، حاول مرة أخرى.'; shake(f); return; }
+    if (!KIOSK) SaifStore.savePlayer(out.name);
     r.saved = out; r.rank = out.rank; boardHL = r.roundId; renderResult(); toast('تم حفظ اسمك في لوحة الصدارة');
   };
   if (KIOSK) {   // وضع الكيوسك: عودة تلقائية للرئيسية بعد 30 ثانية من عدم اللمس

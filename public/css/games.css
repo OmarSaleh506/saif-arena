@@ -3,7 +3,7 @@
    Single dark look in the SAIF booth identity. */
 :root{
   --deep:#0C2423; --ink:#12302F; --panel:#173B3A; --line:#2C5250; --line2:#3F6E6C;
-  --cream:#F4F2EA; --soft:#C7D3D1; --mute:#8FA6A3;
+  --cream:#F4F2EA; --soft:#D3DEDC; --mute:#A9BDBA;
   --blue:#84B6C6; --coral:#C9705F; --terr:#B95D4E; --ok:#6FBF9A; --bad:#E07A6A; --gold:#E8C77A;
   --f:'Tajawal','Segoe UI','Noto Sans Arabic',Tahoma,sans-serif;
   --mono:ui-monospace,Menlo,Consolas,monospace;

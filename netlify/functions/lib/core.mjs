@@ -9,24 +9,12 @@ export function cleanName(n) {
   const s = String(n).replace(/[\u0000-\u001f\u007f<>]/g, '').split(' ').filter(Boolean).join(' ');
   return s.length < 2 || s.length > 24 ? null : s;
 }
-export function cleanPhone(p) {
-  if (p == null) return null;
-  const raw = String(p);
-  let s = raw.replace(/[٠-٩]/g, c => c.charCodeAt(0) - 0x660).replace(/[۰-۹]/g, c => c.charCodeAt(0) - 0x6F0).replace(/\D/g, '');
-  if (s.startsWith('00')) s = s.slice(2);
-  if (s.startsWith('966') && s.length === 12 && s[3] === '5') return '0' + s.slice(3);
-  if (s.length === 10 && s.startsWith('05')) return s;
-  if (s.length === 9 && s[0] === '5') return '0' + s;
-  const t = raw.trimStart();
-  if (t.startsWith('+') || t.startsWith('00')) return s.length >= 9 && s.length <= 15 ? '+' + s : null;
-  return null;
-}
 
 export const emptyData = () => ({ rounds: [], cfg: { publicUrl: '', closedDays: {}, crowd: false } });
 
 function view(d, admin) {
   return {
-    rounds: d.rounds.map(r => admin ? r : { ...r, phone: '' }),
+    rounds: d.rounds.map(({ phone, ...r }) => r),
     cfg: d.cfg, now: Date.now(),
   };
 }
@@ -41,14 +29,14 @@ function applyOp(d, op, admin, now) {
       const max = Math.round(+r.max), score = Math.round(+r.score);
       if (!(max >= 1 && max <= 2000) || !(score >= 0 && score <= max)) return 'bad';
       if (d.rounds.some(x => x.id === r.id)) return 'dup';
-      d.rounds.push({ id: r.id, day: dayOf(now), ts: now, name: '', phone: '', game: r.game, screen: +r.screen, score, max, tier: r.tier, lv: [1, 2, 3].includes(+r.lv) ? +r.lv : 1, hidden: false });
+      d.rounds.push({ id: r.id, day: dayOf(now), ts: now, name: '', game: r.game, screen: +r.screen, score, max, tier: r.tier, lv: [1, 2, 3].includes(+r.lv) ? +r.lv : 1, hidden: false });
       return 'ok';
     }
     case 'ident': {
-      const r = d.rounds.find(x => x.id === op.id), n = cleanName(op.name), p = cleanPhone(op.phone);
-      if (!r || !n || !p || r.name) return 'bad';
+      const r = d.rounds.find(x => x.id === op.id), n = cleanName(op.name);
+      if (!r || !n || r.name) return 'bad';
       if (d.cfg.closedDays[r.day]) return 'closed';
-      r.name = n; r.phone = p; return 'ok';
+      r.name = n; return 'ok';
     }
     case 'hide': { const r = d.rounds.find(x => x.id === op.id); if (!r) return 'bad'; r.hidden = !!op.hidden; return 'ok'; }
     case 'close': {
@@ -68,10 +56,10 @@ function applyOp(d, op, admin, now) {
 
 /** db: { load(): Promise<data>, update(fn): Promise<any> } */
 export async function handle(db, { method, path, body, pin }, env = {}) {
-  const adminPin = String(env.ADMIN_PIN || '2026'), admin = pin === adminPin;
+  const adminPin = String(env.ADMIN_PIN || ''), pinOk = adminPin.length >= 6, admin = pinOk && pin === adminPin;
   const json = (status, b) => ({ status, body: b });
   if (path === '/ping') return json(200, { ok: true, mode: 'remote' });
-  if (path === '/auth' && method === 'POST') return admin || (body && body.pin === adminPin) ? json(200, { ok: true }) : json(401, { ok: false });
+  if (path === '/auth' && method === 'POST') return !pinOk ? json(503, { ok: false, reason: 'nopin' }) : admin || (body && body.pin === adminPin) ? json(200, { ok: true }) : json(401, { ok: false });
   if (path === '/data' && method === 'GET') return json(200, view(await db.load(), admin));
   if (path === '/ops' && method === 'POST') {
     const ops = body && Array.isArray(body.ops) ? body.ops.slice(0, 50) : null;

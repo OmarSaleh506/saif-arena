@@ -9,7 +9,11 @@ const SaifStore = (() => {
   let mode = 'local', online = false;
   const API = (window.SAIF_API && window.SAIF_API !== 'local') ? window.SAIF_API.replace(/\/$/, '') : '/api';
   const pinNow = () => { try { return sessionStorage.getItem('saif_admin_pin') || ''; } catch (e) { return ''; } };
-  const ADMIN_PIN = '2026';
+  /* لا يوجد رمز افتراضي: على الخادم يُضبط ADMIN_PIN (6 خانات فأكثر)، وفي الوضع المحلي يختار المنظّم رمزه عند أول دخول */
+  const hashPin = async p => { try { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('saif|' + p)); return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join(''); } catch (e) { let h = 5381; for (const c of 'saif|' + p) h = ((h << 5) + h + c.charCodeAt(0)) >>> 0; return 'x' + h; } };
+  const localPin = () => { try { return localStorage.getItem('saif_pin_h') || ''; } catch (e) { return ''; } };
+  let authReason = '';
+  async function setLocalPin(p) { if (String(p).length < 6) return false; try { localStorage.setItem('saif_pin_h', await hashPin(p)); return true; } catch (e) { return false; } }
   const rd = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } };
   const wr = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } };
 
@@ -29,18 +33,6 @@ const SaifStore = (() => {
     if (n == null) return null;
     const s = String(n).replace(/[\u0000-\u001f\u007f<>]/g, '').split(' ').filter(Boolean).join(' ');
     return s.length < 2 || s.length > 24 ? null : s;
-  }
-  function cleanPhone(p) {
-    if (p == null) return null;
-    const raw = String(p);
-    let s = raw.replace(/[٠-٩]/g, c => c.charCodeAt(0) - 0x660).replace(/[۰-۹]/g, c => c.charCodeAt(0) - 0x6F0).replace(/\D/g, '');
-    if (s.startsWith('00')) s = s.slice(2);
-    if (s.startsWith('966') && s.length === 12 && s[3] === '5') return '0' + s.slice(3);
-    if (s.length === 10 && s.startsWith('05')) return s;
-    if (s.length === 9 && s[0] === '5') return '0' + s;
-    const t = raw.trimStart();
-    if (t.startsWith('+') || t.startsWith('00')) return s.length >= 9 && s.length <= 15 ? '+' + s : null;
-    return null;
   }
 
   /* ---------- المزامنة مع الخادم المشترك ---------- */
@@ -79,8 +71,8 @@ const SaifStore = (() => {
     return mode;
   }
   async function verifyPin(p) {
-    if (mode !== 'remote') return p === ADMIN_PIN;
-    try { const r = await fetch(API + '/auth', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ pin: p }) }); return r.ok; } catch (e) { return false; }
+    authReason = ''; if (mode !== 'remote') return !!localPin() && await hashPin(p) === localPin();
+    try { const r = await fetch(API + '/auth', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ pin: p }) }); if (r.status === 503) authReason = 'nopin'; return r.ok; } catch (e) { return false; }
   }
 
   /* ---------- الجولات ---------- */
@@ -90,24 +82,23 @@ const SaifStore = (() => {
     for (const r of rows) { const k = key(r.name), c = m.get(k); if (!c || r.score > c.score) m.set(k, r); }
     return [...m.values()].sort((a, b) => b.score - a.score || a.ts - b.ts);
   }
-  /** تُسجَّل كل جولة منتهية دون اسم، ثم يُضاف الاسم والجوال عند الحفظ. */
+  /** تُسجَّل كل جولة منتهية دون اسم، ثم يُضاف الاسم عند الحفظ. */
   function addRound(o) {
     const all = rounds();
-    const r = { id: newId(), day: today(), ts: Date.now(), name: '', phone: '', game: o.game, screen: o.screen, score: o.score, max: o.max, tier: o.tier, lv: o.lv || 1, hidden: false };
+    const r = { id: newId(), day: today(), ts: Date.now(), name: '', game: o.game, screen: o.screen, score: o.score, max: o.max, tier: o.tier, lv: o.lv || 1, hidden: false };
     all.push(r); saveRounds(all);
     push({ t: 'add', round: { id: r.id, game: r.game, screen: r.screen, score: r.score, max: r.max, tier: r.tier, lv: r.lv } });
     return r.id;
   }
-  function saveIdentity(id, name, phone) {
-    const n = cleanName(name), p = cleanPhone(phone);
+  function saveIdentity(id, name) {
+    const n = cleanName(name);
     if (!n) return { ok: false, err: 'name' };
-    if (!p) return { ok: false, err: 'phone' };
     const all = rounds(), r = all.find(x => x.id === id);
     if (!r) return { ok: false, err: 'missing' };
     if (cfg().closedDays[r.day]) return { ok: false, err: 'closed' };
-    r.name = n; r.phone = p; saveRounds(all);
-    push({ t: 'ident', id, name: n, phone: p });
-    return { ok: true, name: n, phone: p, rank: rankOf(r) };
+    r.name = n; delete r.phone; saveRounds(all);
+    push({ t: 'ident', id, name: n });
+    return { ok: true, name: n, rank: rankOf(r) };
   }
   function rankOf(r) {
     const best = bestPerName(rounds().filter(x => x.day === r.day && isNamed(x)));
@@ -150,13 +141,13 @@ const SaifStore = (() => {
     rows.forEach(r => { played[key(r.name)] = (played[key(r.name)] || 0) + 1; });
     const at = cfg().closedDays[day];
     return { day, closed: !!at, closedAt: at || null, participants: best.length, rounds: rows.length,
-      rows: best.map((r, i) => ({ rank: i + 1, name: r.name, phone: r.phone, game: r.game, screen: r.screen, score: r.score, max: r.max, tier: r.tier, roundsPlayed: played[key(r.name)] })) };
+      rows: best.map((r, i) => ({ rank: i + 1, name: r.name, game: r.game, screen: r.screen, score: r.score, max: r.max, tier: r.tier, roundsPlayed: played[key(r.name)] })) };
   }
   function winners(top = 3) {
     const t = today(), c = cfg(), byDay = {};
     rounds().filter(r => isNamed(r)).forEach(r => (byDay[r.day] ||= []).push(r));
     return Object.keys(byDay).sort().reverse().slice(0, 14).map(d => ({ day: d, open: d === t && !c.closedDays[d], participants: new Set(byDay[d].map(r => key(r.name))).size, rounds: byDay[d].length,
-      top: bestPerName(byDay[d]).slice(0, top).map((r, i) => ({ rank: i + 1, name: r.name, phone: r.phone, score: r.score, game: r.game, screen: r.screen })) }));
+      top: bestPerName(byDay[d]).slice(0, top).map((r, i) => ({ rank: i + 1, name: r.name, score: r.score, game: r.game, screen: r.screen })) }));
   }
   function setHidden(id, hidden) { const all = rounds(), r = all.find(x => x.id === id); if (!r) return false; r.hidden = hidden; saveRounds(all); push({ t: 'hide', id, hidden: !!hidden }); return true; }
   function closeDay(day, close) { const c = cfg(); if (close) c.closedDays[day] = Date.now(); else delete c.closedDays[day]; saveCfg(c); push({ t: 'close', day, close: !!close }); }
@@ -175,20 +166,20 @@ const SaifStore = (() => {
   const blob = t => new Blob(['﻿' + (window.SAIF_TR ? SAIF_TR(t) : t)], { type: 'text/csv;charset=utf-8' });
   function csvDay(day) {
     const rep = dayReport(day);
-    return blob('اليوم,الترتيب,الاسم,الجوال,التجربة,الشاشة,أفضل نقاط,المستوى,عدد الجولات\n' + rep.rows.map(r => [day, r.rank, E(safe(r.name)), E(safe(r.phone)), E(gname(r.game)), r.screen, r.score, r.tier, r.roundsPlayed].join(',')).join('\n'));
+    return blob('اليوم,الترتيب,الاسم,التجربة,الشاشة,أفضل نقاط,المستوى,عدد الجولات\n' + rep.rows.map(r => [day, r.rank, E(safe(r.name)), E(gname(r.game)), r.screen, r.score, r.tier, r.roundsPlayed].join(',')).join('\n'));
   }
   function csvWinners() {
-    const lines = winners(3).reverse().flatMap(w => w.top.map(x => [w.day, x.rank, E(safe(x.name)), E(safe(x.phone)), x.score, E(gname(x.game)), x.screen].join(',')));
-    return blob('اليوم,المركز,الاسم,الجوال,النقاط,التجربة,الشاشة\n' + lines.join('\n'));
+    const lines = winners(3).reverse().flatMap(w => w.top.map(x => [w.day, x.rank, E(safe(x.name)), x.score, E(gname(x.game)), x.screen].join(',')));
+    return blob('اليوم,المركز,الاسم,النقاط,التجربة,الشاشة\n' + lines.join('\n'));
   }
   function csvAll() {
-    return blob('التاريخ,الاسم,الجوال,التجربة,الشاشة,النقاط,المستوى\n' + rounds().filter(r => r.name).sort((a, b) => a.ts - b.ts).map(r => [r.day, E(safe(r.name)), E(safe(r.phone)), E(gname(r.game)), r.screen, r.score, r.tier].join(',')).join('\n'));
+    return blob('التاريخ,الاسم,التجربة,الشاشة,النقاط,المستوى\n' + rounds().filter(r => r.name).sort((a, b) => a.ts - b.ts).map(r => [r.day, E(safe(r.name)), E(gname(r.game)), r.screen, r.score, r.tier].join(',')).join('\n'));
   }
 
   /* ---------- اللاعب الحالي (تعبئة تلقائية خارج وضع الكيوسك) ---------- */
-  const player = () => rd(K.player, { name: '', phone: '' });
-  const savePlayer = (name, phone) => wr(K.player, { name, phone });
+  const player = () => rd(K.player, { name: '' });
+  const savePlayer = name => wr(K.player, { name });
 
-  return { ADMIN_PIN, today, dayOf, cleanName, cleanPhone, addRound, saveIdentity, projectedRank, board, stats, summary, roundsList, dayReport, winners,
+  return { needsSetup: () => mode !== 'remote' && !localPin(), setLocalPin, authReason: () => authReason, today, dayOf, cleanName, addRound, saveIdentity, projectedRank, board, stats, summary, roundsList, dayReport, winners,
     setHidden, closeDay, setPublicUrl, setCrowd, resetAll, init, sync, verifyPin, mode: () => mode, online: () => online, csvDay, csvWinners, csvAll, config: cfg, player, savePlayer };
 })();

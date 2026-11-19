@@ -10,12 +10,14 @@ h1{margin:0;font-size:1.8rem;font-weight:800}.sub{margin:0;color:#E8C77A;font-we
 .btns{display:flex;gap:.8rem;flex-wrap:wrap;justify-content:center;margin-top:.4rem}
 button,a.b{font:inherit;font-weight:800;font-size:1.1rem;padding:.9rem 1.7rem;border-radius:999px;border:none;background:#C9705F;color:#fff;cursor:pointer;text-decoration:none}
 button.g{background:transparent;border:2px solid rgba(244,242,234,.4)}
+.res{width:100%;max-width:30rem;background:rgba(244,242,234,.06);border:1px solid rgba(244,242,234,.16);border-radius:1.2rem;padding:1rem 1.2rem;text-align:start}.res h2{margin:0 0 .3rem;font-size:1.15rem}.res p{margin:0 0 .7rem;color:#C7D3D1;font-size:.95rem}.res a{display:inline-block;margin:.2rem .3rem .2rem 0;padding:.45rem 1rem;border-radius:999px;border:1.5px solid rgba(244,242,234,.35);color:#F4F2EA;text-decoration:none;font-weight:700;font-size:.95rem}
 .ok{color:#6FBF9A;min-height:1.4em;font-weight:700}
 </style></head><body>
 <h1>كوينك من تجارب طويق التفاعلية</h1><p class="sub" id="sub"></p>
 <div class="cn-stage" id="st"></div>
 <p class="mute">اسحب الكوين لتدويره، والمسها لتقلبها</p>
 <div class="btns"><button id="sv">حفظ الصورة</button><button class="g" id="sh" hidden>مشاركة</button><a class="b" id="kp" href="pack/knowledge-pack.pdf" download="الحقيبة-المعرفية-GSTS.pdf" style="flex-basis:100%;text-align:center">حمّل الحقيبة المعرفية (PDF)</a><a class="b g" href="./">افتح تجارب طويق التفاعلية</a></div><p class="ok" id="ok"></p>
+<section class="res" id="res" aria-label="مصادر لتتعلم أكثر"></section>
 <script src="js/icons.js"></script><script>const I = n => `<span class="ic">${ICONS[n] || ''}</span>`;</script><script src="js/games-meta.js"></script><script src="js/coin.js"></script>
 <script>
 const q = new URLSearchParams(location.search), g = GAMES.find(x => x.id === q.get('g')) || GAMES[0], tk = ['gold', 'silver', 'bronze'].includes(q.get('t')) ? q.get('t') : 'gold', score = Math.max(0, Math.min(2000, +q.get('s') || 0)), lvl = [1, 2, 3].includes(+q.get('l')) ? +q.get('l') : 0, scr = +q.get('c') === 2 ? 2 : 1, ser = Math.max(0, Math.min(9999, +q.get('n') || 0)) || undefined, CO = { scr, score, n: ser, lv: lvl };
@@ -27,7 +29,8 @@ st.onpointerdown = e => { drag = { x: e.clientX, a: ang, t: performance.now(), m
 st.onpointermove = e => { if (!drag) return; drag.m += Math.abs(e.clientX - drag.x - (ang - drag.a) / .6); ang = drag.a + (e.clientX - drag.x) * .6; };
 st.onpointerup = () => { if (drag && performance.now() - drag.t < 300 && Math.abs(ang - drag.a) < 6) ang = Math.round(ang / 180) * 180 + 180; drag = null; setTimeout(() => { auto = true; }, 1200); };
 coinCelebrate(st, tk);
-const ok = document.getElementById('ok');
+const ok = document.getElementById('ok'), T = trackOf(g.id);
+document.getElementById('res').innerHTML = `<h2>تعلّم أكثر في ${T.name}</h2><p>${T.note}.</p><a href="https://satr.tuwaiq.edu.sa" target="_blank" rel="noopener">سطر · الدورات</a><a href="https://challenges.tuwaiq.edu.sa" target="_blank" rel="noopener">تحديات طويق</a><a href="https://library.tuwaiq.edu.sa" target="_blank" rel="noopener">مكتبة طويق</a>`;
 document.getElementById('sv').onclick = async () => { const cv = await coinPng(g, tk, score, CO); cv.toBlob(b => { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'saif-coin.png'; a.click(); ok.textContent = 'تم حفظ الصورة في جوالك'; }, 'image/png'); };
 if (navigator.canShare) { const s = document.getElementById('sh'); s.hidden = false; s.onclick = async () => { const cv = await coinPng(g, tk, score, CO); cv.toBlob(async b => { const f = new File([b], 'saif-coin.png', { type: 'image/png' }); try { if (navigator.canShare({ files: [f] })) await navigator.share({ files: [f], title: TRX('كوين مشاركتي في تجارب طويق التفاعلية'), text: TRX('أشاركك كوين مشاركتي في تجارب طويق التفاعلية 🏅\nأنهيت «' + g.badge + '» بصعوبة ' + (lvl ? COIN_LV[lvl][0] : '') + ' وكوين المستوى ' + COIN_TIER[tk][0] + ' ونتيجتي ' + score + ' نقطة.\nجرّب التحدي بنفسك وشوف كوينك: ' + location.origin) }); } catch (e) {} }); }; }
 </script></body></html>
